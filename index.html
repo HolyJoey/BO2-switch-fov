@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f4f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
+<title>BO2 Switch FOV Patcher</title>
+<meta name="description" content="Unlock a higher FOV in BO2 Requiem NX on the Switch: patches your own t6zm.nro or t6mp.nro, locally in your browser.">
+<style>
+:root{
+  --bg:#f4f5f7; --surface:#ffffff; --surface-2:#eef0f3; --text:#16181d; --muted:#5b6170;
+  --border:#d9dce3; --accent:#b93d0b; --accent-ink:#ffffff; --ok:#1f7a3a; --ok-bg:#e6f4ea;
+  --warn:#8a5a00; --warn-bg:#fff4d6; --err:#b42318; --err-bg:#fde8e7; --code-bg:#1b1e24; --code-text:#e8eaf0;
+  --radius:12px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1115; --surface:#171a20; --surface-2:#1f232b; --text:#e9ebf0; --muted:#9aa1b0;
+    --border:#2b303a; --accent:#ff7a3d; --accent-ink:#1a0d05; --ok:#5fd38a; --ok-bg:#12291b;
+    --warn:#f2c14e; --warn-bg:#2b2410; --err:#ff8a80; --err-bg:#331715; --code-bg:#0b0d10; --code-text:#e8eaf0;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1115; --surface:#171a20; --surface-2:#1f232b; --text:#e9ebf0; --muted:#9aa1b0;
+  --border:#2b303a; --accent:#ff7a3d; --accent-ink:#1a0d05; --ok:#5fd38a; --ok-bg:#12291b;
+  --warn:#f2c14e; --warn-bg:#2b2410; --err:#ff8a80; --err-bg:#331715; --code-bg:#0b0d10; --code-text:#e8eaf0;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{margin:0}
+button,a,label,input{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+body{background:var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:720px;margin:0 auto;padding:28px max(16px,env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+header{margin-bottom:20px}
+h1{font-size:1.65rem;line-height:1.2;margin:0 0 6px;letter-spacing:-.01em}
+h1 span{color:var(--accent)}
+.lede{color:var(--muted);margin:0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin:16px 0}
+.card h2{font-size:1.05rem;margin:0 0 12px;display:flex;align-items:center;gap:10px}
+.step{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:.85rem;font-weight:700;flex:none}
+.drop{display:block;border:2px dashed var(--border);border-radius:var(--radius);padding:28px 16px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;background:var(--surface-2)}
+.drop:hover,.drop.over{border-color:var(--accent)}
+.drop strong{display:block;font-size:1.05rem;margin-bottom:4px}
+.drop small{color:var(--muted)}
+.drop input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.status{margin-top:14px;padding:12px 14px;border-radius:10px;display:none;word-wrap:break-word}
+.status.show{display:block}
+.status.ok{background:var(--ok-bg);color:var(--ok)}
+.status.warn{background:var(--warn-bg);color:var(--warn)}
+.status.err{background:var(--err-bg);color:var(--err)}
+.status.info{background:var(--surface-2);color:var(--text)}
+.status b{color:inherit}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:var(--accent-ink);border:0;border-radius:10px;padding:12px 18px;font:inherit;font-weight:650;cursor:pointer;text-decoration:none;margin-top:14px}
+.btn[hidden]{display:none}
+.btn.secondary{background:var(--surface-2);color:var(--text);border:1px solid var(--border);padding:8px 12px;font-size:.9rem;font-weight:550;margin-top:0}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-bottom:10px}
+.fov{display:flex;align-items:center;gap:10px;font-weight:550}
+input[type=range]{accent-color:var(--accent);width:180px;max-width:50vw}
+input.fov-num{width:5.5ch;box-sizing:content-box;padding:6px 8px;font:inherit;font-weight:700;font-variant-numeric:tabular-nums;text-align:center;color:var(--text);background:var(--surface-2);border:1px solid var(--border);border-radius:8px;-moz-appearance:textfield;appearance:textfield}
+input.fov-num::-webkit-inner-spin-button,input.fov-num::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input.fov-num:focus{outline:2px solid var(--accent);outline-offset:1px}
+pre{background:var(--code-bg);color:var(--code-text);border-radius:10px;padding:14px;overflow-x:auto;margin:0;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+#cfgPath{word-break:break-all}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em;background:var(--surface-2);padding:1px 5px;border-radius:5px}
+ol{margin:0;padding-left:1.3em}
+ol li{margin:6px 0}
+.muted{color:var(--muted)}
+.tabs{display:flex;gap:6px;margin-bottom:10px}
+.tabs button{background:var(--surface-2);color:var(--muted);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font:inherit;font-size:.9rem;cursor:pointer}
+.tabs button[aria-selected="true"]{color:var(--text);border-color:var(--accent);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--border);vertical-align:top}
+th{color:var(--muted);font-weight:600}
+.badge{display:inline-block;font-size:.75rem;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);white-space:nowrap}
+.badge.ok{color:var(--ok);border-color:currentColor;background:transparent}
+.badge.warn{color:var(--warn);border-color:currentColor;background:transparent}
+footer{color:var(--muted);font-size:.88rem;margin-top:28px;border-top:1px solid var(--border);padding-top:16px}
+footer a,.card a:not(.btn){color:var(--accent)}
+[hidden]{display:none!important}
+.small{font-size:.88rem}
+.touch-only{display:none}
+@media (hover:none) and (pointer:coarse){
+  .touch-only{display:inline}
+  p.touch-only{display:block}
+  .pointer-only{display:none}
+  .btn,.tabs button,.btn.secondary,input.fov-num{min-height:44px}
+  input.fov-num{padding-top:0;padding-bottom:0}
+  input[type=range]{height:32px}
+  .drop{padding:32px 16px}
+}
+@media (max-width:520px){
+  h1{font-size:1.4rem}
+  .card{padding:16px}
+  .row{flex-direction:column;align-items:stretch}
+  .fov{justify-content:space-between}
+  input[type=range]{flex:1;width:auto;max-width:none}
+  .btn{width:100%}
+  .tabs button{flex:1}
+  pre{font-size:13px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>BO2 Switch <span>FOV patcher</span></h1>
+    <p class="lede">Higher FOV (120 and beyond) in BO2 Requiem NX for both Zombies and Multiplayer. Everything happens in your own browser: your file is never uploaded.</p>
+  </header>
+
+  <section class="card">
+    <h2><span class="step">1</span><span>Pick your .nro file</span></h2>
+    <p class="muted" style="margin-top:0">Take <code>t6zm.nro</code> (Zombies) or <code>t6mp.nro</code> (Multiplayer) from <code>/switch/t6game/</code> on your SD card. <b>Keep a copy of the original first.</b></p>
+    <label class="drop" id="drop">
+      <input type="file" id="file">
+      <strong><span class="pointer-only">Drop your file here or click to choose</span><span class="touch-only">Tap to choose your file</span></strong>
+      <small>The page detects by itself whether it's Zombies or Multiplayer.</small>
+    </label>
+    <output class="status" id="status" aria-live="polite"></output>
+    <a class="btn" id="dl" hidden>Download patched file</a>
+    <p class="muted small touch-only" id="dlHint" hidden style="margin:10px 0 0">On a phone the file is saved to your Downloads (the Files app on iPhone). Copy it to the SD card from there.</p>
+  </section>
+
+  <section class="card">
+    <h2><span class="step">2</span><span>Set your FOV in the config</span></h2>
+    <p class="muted" style="margin-top:0">The patch only removes the 90 limit. You set the FOV itself with these lines. Replace any existing <code>cg_fov</code> lines, or add them.</p>
+    <div class="row">
+      <div class="fov"><label for="fovNum">FOV</label><input type="range" id="fov" min="65" max="160" step="1" value="120" aria-label="FOV slider"><input type="number" class="fov-num" id="fovNum" min="65" max="160" step="1" value="120" inputmode="numeric" aria-label="FOV value (65 to 160)"></div>
+      <button type="button" class="btn secondary" id="copy">Copy</button>
+    </div>
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" data-mode="zm" aria-selected="true">Zombies</button>
+      <button type="button" role="tab" data-mode="mp" aria-selected="false">Multiplayer</button>
+    </div>
+    <p class="muted" style="margin:0 0 8px">File: <code id="cfgPath">/switch/t6game/players/config_zm.cfg</code></p>
+    <pre id="cfg"></pre>
+  </section>
+
+  <section class="card">
+    <h2><span class="step">3</span><span>Back on the Switch</span></h2>
+    <ol>
+      <li>Put the downloaded file back in <code>/switch/t6game/</code>, with exactly the same name (<code>t6zm.nro</code> or <code>t6mp.nro</code>).</li>
+      <li>Edit the config as shown in step 2.</li>
+      <li>Start the game. <b>Zombies:</b> play without the <code>dlc5</code> mod, because it resets the FOV to 90 by itself.</li>
+      <li>Want to undo it? Put your original file back.</li>
+    </ol>
+  </section>
+
+  <section class="card">
+    <h2>Supported versions</h2>
+    <table>
+      <thead><tr><th>File</th><th>Build</th><th>Status</th></tr></thead>
+      <tbody id="versions"></tbody>
+    </table>
+    <p class="muted" style="margin:12px 0 0">Only these exact versions work. After a Requiem update the code shifts and the page refuses the file, so nothing can break.</p>
+  </section>
+
+  <section class="card">
+    <h2>What gets changed?</h2>
+    <p style="margin:0">The engine won't accept a value above 90 for <code>cg_fov</code> and <code>cg_fov_default</code>. At two spots one 4-byte instruction is replaced so the limit becomes 160. Nothing else changes: the file stays the same size, and the patch only affects your own view.</p>
+  </section>
+
+  <footer>
+    <p style="margin-top:0">The game runs on <a href="https://github.com/HDErick/BO2-Requiem-NX" rel="noopener">BO2 Requiem NX</a> by <b>HDErick</b>. All credit for the port goes to them. This patcher is a separate, unofficial tool and isn't part of that project.</p>
+    <p style="margin-bottom:0">This page doesn't contain or distribute any Requiem files. Download Requiem yourself from the <a href="https://github.com/HDErick/BO2-Requiem-NX/releases" rel="noopener">official releases</a>, then patch your own copy here. You add your own BO2 game data as usual.</p>
+  </footer>
+</div>
+
+<script>
+(() => {
+  const NEW = [0x00, 0x64, 0xa8, 0x52]; // movz w0,#0x4320,lsl#16  →  max = 160.0f
+  const PROFILES = [
+    { id: 'zm', name: 'Zombies', file: 't6zm.nro', build: '0.2.5', size: 51335533, cfg: 'config_zm.cfg',
+      sites: [ { off: 0x20e71b9, old: [0x80,0x5a,0x46,0xb9] }, { off: 0x23c9405, old: [0x00,0xa0,0x40,0xb9] } ] },
+    { id: 'mp', name: 'Multiplayer', file: 't6mp.nro', build: '0.2.5', size: 83981876, cfg: 'config_mp.cfg',
+      sites: [ { off: 0x3ffdb50, old: [0x80,0x9a,0x4c,0xb9] }, { off: 0x42dfd7c, old: [0x00,0xe0,0x46,0xb9] } ] },
+  ];
+
+  const MSG = {
+    reading: () => 'Reading file…',
+    ok: (p, n) => `<b>Detected ${p.name} (${p.file}).</b> Patch applied at ${n} spots. Download your patched file below.`,
+    already: p => `<b>${p.name} (${p.file}) is already patched.</b> Nothing to do here, just set the FOV in your config (step 2).`,
+    partial: p => `<b>${p.name} (${p.file}) was only half patched.</b> The missing spot has now been patched too. Download the file below.`,
+    unknown: sz => `<b>Unknown version.</b> This file (${sz.toLocaleString('en-US')} bytes) doesn't match a supported build. It's probably an older or newer Requiem version. Nothing was changed.`,
+    notnro: () => '<b>This isn\'t an .nro file.</b> Pick <code>t6zm.nro</code> or <code>t6mp.nro</code>.',
+    readerr: () => 'The file could not be read. Please try again.',
+  };
+  const nameHint = (p, f) => ` <span class="muted">(Note: the contents are ${p.name}, but the file is called “${f}”. Name it <code>${p.file}</code> on the SD.)</span>`;
+
+  const $ = id => document.getElementById(id);
+  const statusEl = $('status'), dl = $('dl'), dlHint = $('dlHint');
+  const showDownload = on => { dl.hidden = !on; dlHint.hidden = !on; };
+  let mode = 'zm', dlUrl = null;
+
+  function setStatus(kind, html) { statusEl.className = 'status show ' + kind; statusEl.innerHTML = html; }
+
+  $('versions').innerHTML = PROFILES.map(p =>
+    `<tr><td><code>${p.file}</code><br><span class="muted">${p.name}</span></td>` +
+    `<td><a href="https://github.com/HDErick/BO2-Requiem-NX/releases/tag/${p.build}" rel="noopener">${p.build}</a><br><span class="muted">${p.size.toLocaleString('en-US')} bytes</span></td>` +
+    `<td><span class="badge ok">Supported</span></td></tr>`).join('');
+
+  const eq = (bytes, expected) => expected.every((b, i) => bytes[i] === b);
+
+  // Only the 4 bytes at each patch site are read, so even the 84 MB Multiplayer file
+  // never has to be loaded into memory. This keeps the page fast and reliable on phones.
+  async function readSite(blob, site) {
+    return new Uint8Array(await blob.slice(site.off, site.off + NEW.length).arrayBuffer());
+  }
+
+  function siteState(bytes, site) {
+    if (eq(bytes, site.old)) return 'old';
+    if (eq(bytes, NEW)) return 'new';
+    return 'other';
+  }
+
+  async function detect(blob) {
+    for (const p of PROFILES) {
+      if (blob.size !== p.size) continue;
+      const bytes = await Promise.all(p.sites.map(site => readSite(blob, site)));
+      const state = p.sites.map((site, i) => siteState(bytes[i], site));
+      if (state.includes('other')) continue;
+      return { p, state };
+    }
+    return null;
+  }
+
+  // Builds the patched file from slices of the original plus the new instruction bytes.
+  function buildPatched(file, sites) {
+    const parts = [];
+    let pos = 0;
+    for (const site of [...sites].sort((a, b) => a.off - b.off)) {
+      parts.push(file.slice(pos, site.off), new Uint8Array(NEW));
+      pos = site.off + NEW.length;
+    }
+    parts.push(file.slice(pos));
+    return new Blob(parts, { type: 'application/octet-stream' });
+  }
+
+  async function handle(file) {
+    showDownload(false);
+    if (dlUrl) { URL.revokeObjectURL(dlUrl); dlUrl = null; }
+    if (!/\.nro$/i.test(file.name)) { setStatus('err', MSG.notnro()); return; }
+    setStatus('info', MSG.reading());
+    try {
+      const hit = await detect(file);
+      if (!hit) { setStatus('err', MSG.unknown(file.size)); return; }
+      const { p, state } = hit;
+      const hint = file.name.toLowerCase() === p.file ? '' : nameHint(p, file.name);
+      setMode(p.id);
+      const todo = state.filter(x => x === 'old').length;
+      if (todo === 0) { setStatus('ok', MSG.already(p) + hint); return; }
+      const patched = buildPatched(file, p.sites);
+      const check = await detect(patched);
+      if (!check || check.state.some(x => x !== 'new')) { setStatus('err', MSG.readerr()); return; }
+      dlUrl = URL.createObjectURL(patched);
+      dl.href = dlUrl; dl.download = p.file; showDownload(true);
+      setStatus('ok', (todo === p.sites.length ? MSG.ok(p, todo) : MSG.partial(p)) + hint);
+    } catch (err) {
+      console.error(err);
+      setStatus('err', MSG.readerr());
+    }
+  }
+
+  const input = $('file'), drop = $('drop');
+  input.addEventListener('change', () => {
+    if (input.files[0]) { handle(input.files[0]); }
+    input.value = '';
+  });
+  ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+  drop.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) handle(f); });
+  window.addEventListener('dragover', e => e.preventDefault());
+  window.addEventListener('drop', e => e.preventDefault());
+
+  // config snippet
+  const fov = $('fov'), fovNum = $('fovNum');
+  const FOV_MIN = 65, FOV_MAX = 160;
+  function renderCfg() {
+    const v = fov.value;
+    $('cfg').textContent = `seta cg_fov "${v}"\nseta cg_fov_default "${v}"` + (mode === 'zm' ? `\nseta cg_fovScale "1"` : '');
+    $('cfgPath').textContent = '/switch/t6game/players/' + PROFILES.find(p => p.id === mode).cfg;
+  }
+  function setMode(m) {
+    mode = m;
+    document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.mode === m)));
+    renderCfg();
+  }
+  document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+  fov.addEventListener('input', () => { fovNum.value = fov.value; renderCfg(); });
+  // Typing: follow along as soon as the value is a valid FOV, without fighting half-typed numbers.
+  fovNum.addEventListener('input', () => {
+    const v = Number(fovNum.value);
+    if (Number.isInteger(v) && v >= FOV_MIN && v <= FOV_MAX) { fov.value = String(v); renderCfg(); }
+  });
+  // Leaving the field: clamp out-of-range or empty input to a valid value.
+  fovNum.addEventListener('change', () => {
+    const v = Math.round(Number(fovNum.value));
+    const clamped = Number.isFinite(v) && fovNum.value !== '' ? Math.min(FOV_MAX, Math.max(FOV_MIN, v)) : Number(fov.value);
+    fovNum.value = String(clamped); fov.value = String(clamped); renderCfg();
+  });
+  $('copy').addEventListener('click', async () => {
+    const btn = $('copy');
+    try { await navigator.clipboard.writeText($('cfg').textContent); btn.textContent = 'Copied'; }
+    catch {
+      // Clipboard API unavailable (e.g. opened from file:// or an older browser): select the text so it can be copied by hand.
+      const r = document.createRange(); r.selectNodeContents($('cfg')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+    setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+  });
+
+  renderCfg();
+})();
+</script>
+</body>
+</html>

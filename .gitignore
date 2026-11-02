@@ -1,0 +1,3 @@
+*.nro
+.scannerwork/
+sonar-project.properties
