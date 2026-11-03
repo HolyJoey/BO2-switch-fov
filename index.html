@@ -53,6 +53,12 @@ h1 span{color:var(--accent)}
 .status.err{background:var(--err-bg);color:var(--err)}
 .status.info{background:var(--surface-2);color:var(--text)}
 .status b{color:inherit}
+.results{display:grid;gap:12px;margin-top:14px}
+.results:empty{display:none}
+.result .status{margin-top:0}
+.actions{display:flex;flex-wrap:wrap;gap:0 10px}
+.actions:empty{display:none}
+.actions .btn,.actions .btn.secondary{margin-top:12px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:var(--accent-ink);border:0;border-radius:10px;padding:12px 18px;font:inherit;font-weight:650;cursor:pointer;text-decoration:none;margin-top:14px}
 .btn[hidden]{display:none}
 .btn.secondary{background:var(--surface-2);color:var(--text);border:1px solid var(--border);padding:8px 12px;font-size:.9rem;font-weight:550;margin-top:0}
@@ -115,12 +121,11 @@ footer a,.card a:not(.btn){color:var(--accent)}
     <h2><span class="step">1</span><span>Pick your .nro file</span></h2>
     <p class="muted" style="margin-top:0">Take <code>t6zm.nro</code> (Zombies) or <code>t6mp.nro</code> (Multiplayer) from <code>/switch/t6game/</code> on your SD card. <b>Keep a copy of the original first.</b></p>
     <label class="drop" id="drop">
-      <input type="file" id="file">
-      <strong><span class="pointer-only">Drop your file here or click to choose</span><span class="touch-only">Tap to choose your file</span></strong>
-      <small>The page detects by itself whether it's Zombies or Multiplayer.</small>
+      <input type="file" id="file" multiple>
+      <strong><span class="pointer-only">Drop your files here or click to choose</span><span class="touch-only">Tap to choose your files</span></strong>
+      <small>Zombies or Multiplayer is detected by itself. You can add both files at once.</small>
     </label>
-    <output class="status" id="status" aria-live="polite"></output>
-    <a class="btn" id="dl" hidden>Download patched file</a>
+    <div class="results" id="results" aria-live="polite"></div>
     <p class="muted small touch-only" id="dlHint" hidden style="margin:10px 0 0">On a phone the file is saved to your Downloads (the Files app on iPhone). Copy it to the SD card from there.</p>
   </section>
 
@@ -145,7 +150,7 @@ footer a,.card a:not(.btn){color:var(--accent)}
       <li>Put the downloaded file back in <code>/switch/t6game/</code>, with exactly the same name (<code>t6zm.nro</code> or <code>t6mp.nro</code>).</li>
       <li>Edit the config as shown in step 2.</li>
       <li>Start the game.</li>
-      <li>Want to undo it? Put your original file back.</li>
+      <li>Want to undo it? Put your original file back. Lost it? Drop the patched file in here and download the original.</li>
     </ol>
   </section>
 
@@ -155,7 +160,7 @@ footer a,.card a:not(.btn){color:var(--accent)}
       <thead><tr><th>File</th><th>Build</th><th>Status</th></tr></thead>
       <tbody id="versions"></tbody>
     </table>
-    <p class="muted" style="margin:12px 0 0">Only these exact versions work. After a Requiem update the code shifts and the page refuses the file, so nothing can break.</p>
+    <p class="muted" style="margin:12px 0 0"><b>Newer Requiem versions work too.</b> The page looks for the FOV code in your file by itself and only patches it when it finds exactly the instructions it expects. Those builds show up as <span class="badge warn">Auto-detected</span> until they have been tested on a Switch. If the code can't be found, the file is refused and nothing is changed.</p>
   </section>
 
   <section class="card">
@@ -169,113 +174,140 @@ footer a,.card a:not(.btn){color:var(--accent)}
   </footer>
 </div>
 
+<script src="patcher.js"></script>
 <script>
 (() => {
-  const NEW = [0x00, 0x64, 0xa8, 0x52]; // movz w0,#0x4320,lsl#16  →  max = 160.0f
-  const PROFILES = [
-    { id: 'zm', name: 'Zombies', file: 't6zm.nro', build: '0.3.0', size: 52273725, cfg: 'config_zm.cfg',
-      sites: [ { off: 0x219ca39, old: [0x80,0x7a,0x43,0xb9] }, { off: 0x2487875, old: [0x00,0xc0,0x4d,0xb9] } ] },
-    { id: 'mp', name: 'Multiplayer', file: 't6mp.nro', build: '0.3.0', size: 84908884, cfg: 'config_mp.cfg',
-      sites: [ { off: 0x40b1810, old: [0x80,0xba,0x4a,0xb9] }, { off: 0x439780c, old: [0x00,0x00,0x45,0xb9] } ] },
-    { id: 'zm', name: 'Zombies', file: 't6zm.nro', build: '0.2.5', size: 51335533, cfg: 'config_zm.cfg',
-      sites: [ { off: 0x20e71b9, old: [0x80,0x5a,0x46,0xb9] }, { off: 0x23c9405, old: [0x00,0xa0,0x40,0xb9] } ] },
-    { id: 'mp', name: 'Multiplayer', file: 't6mp.nro', build: '0.2.5', size: 83981876, cfg: 'config_mp.cfg',
-      sites: [ { off: 0x3ffdb50, old: [0x80,0x9a,0x4c,0xb9] }, { off: 0x42dfd7c, old: [0x00,0xe0,0x46,0xb9] } ] },
-  ];
-
-  const MSG = {
-    reading: () => 'Reading file…',
-    ok: (p, n) => `<b>Detected ${p.name} (${p.file}).</b> Patch applied at ${n} spots. Download your patched file below.`,
-    already: p => `<b>${p.name} (${p.file}) is already patched.</b> Nothing to do here, just set the FOV in your config (step 2).`,
-    partial: p => `<b>${p.name} (${p.file}) was only half patched.</b> The missing spot has now been patched too. Download the file below.`,
-    unknown: sz => `<b>Unknown version.</b> This file (${sz.toLocaleString('en-US')} bytes) doesn't match a supported build. It's probably an older or newer Requiem version. Nothing was changed.`,
-    notnro: () => '<b>This isn\'t an .nro file.</b> Pick <code>t6zm.nro</code> or <code>t6mp.nro</code>.',
-    readerr: () => 'The file could not be read. Please try again.',
+  const P = window.FovPatcher;
+  const RELEASES = 'https://github.com/HDErick/BO2-Requiem-NX/releases';
+  const MAX_FILES = 4;
+  const STATUS = {
+    tested: ['ok', 'Tested on Switch'],
+    verified: ['ok', 'Supported'],
+    auto: ['warn', 'Auto-detected'],
   };
-  const nameHint = (p, f) => ` <span class="muted">(Note: the contents are ${p.name}, but the file is called “${f}”. Name it <code>${p.file}</code> on the SD.)</span>`;
+  const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+  const esc = s => String(s).replace(/[&<>"']/g, c => ESC[c]);
+  const bytes = n => n.toLocaleString('en-US');
+  const badge = status => `<span class="badge ${STATUS[status][0]}">${STATUS[status][1]}</span>`;
 
   const $ = id => document.getElementById(id);
-  const statusEl = $('status'), dl = $('dl'), dlHint = $('dlHint');
-  const showDownload = on => { dl.hidden = !on; dlHint.hidden = !on; };
-  let mode = 'zm', dlUrl = null;
+  const resultsEl = $('results'), dlHint = $('dlHint');
+  let mode = 'zm', urls = [];
 
-  function setStatus(kind, html) { statusEl.className = 'status show ' + kind; statusEl.innerHTML = html; }
+  // Supported versions table: the hand-checked builds, plus a row for everything newer.
+  $('versions').innerHTML = P.KNOWN.map(k => {
+    const kind = P.KINDS[k.kind], status = k.tested ? 'tested' : 'verified';
+    return `<tr><td><code>${kind.file}</code><br><span class="muted">${kind.name}</span></td>` +
+      `<td><a href="${RELEASES}/tag/${k.build}" rel="noopener">${k.build}</a>${k.note ? ' <span class="muted small">(' + k.note + ')</span>' : ''}<br><span class="muted">${bytes(k.size)} bytes</span></td>` +
+      `<td>${badge(status)}${k.tested ? '' : '<br><span class="muted small">Not tested in game yet</span>'}</td></tr>`;
+  }).join('') +
+    '<tr><td>Both files<br><span class="muted">Zombies and Multiplayer</span></td>' +
+    `<td>Newer releases<br><span class="muted">any size</span></td><td>${badge('auto')}</td></tr>`;
 
-  $('versions').innerHTML = PROFILES.map(p =>
-    `<tr><td><code>${p.file}</code><br><span class="muted">${p.name}</span></td>` +
-    `<td><a href="https://github.com/HDErick/BO2-Requiem-NX/releases/tag/${p.build}" rel="noopener">${p.build}</a><br><span class="muted">${p.size.toLocaleString('en-US')} bytes</span></td>` +
-    `<td><span class="badge ok">Supported</span></td></tr>`).join('');
+  const MSG = {
+    reading: (name, pct) => `Reading <b>${esc(name)}</b>…` + (pct ? ' ' + pct + '%' : ''),
+    notnro: name => `<b>${esc(name)} isn't an .nro file.</b> Pick <code>t6zm.nro</code> or <code>t6mp.nro</code>.`,
+    refused: (name, size) => `<b>${esc(name)}: FOV code not found.</b> This file (${bytes(size)} bytes) isn't a Requiem <code>t6zm.nro</code> or <code>t6mp.nro</code>, or this Requiem version changed the code too much. Nothing was changed. (<code>t6game.nro</code> is the launcher and doesn't need patching.)`,
+    readerr: name => `<b>${esc(name)} could not be read.</b> Please try again.`,
+    toomany: n => `You added ${n} files. Only the first ${MAX_FILES} are handled.`,
+  };
 
-  const eq = (bytes, expected) => expected.every((b, i) => bytes[i] === b);
-
-  // Only the 4 bytes at each patch site are read, so even the 84 MB Multiplayer file
-  // never has to be loaded into memory. This keeps the page fast and reliable on phones.
-  async function readSite(blob, site) {
-    return new Uint8Array(await blob.slice(site.off, site.off + NEW.length).arrayBuffer());
+  function title(r) {
+    const ver = r.version ? `Requiem ${esc(r.version)}` : 'Requiem (unknown version)';
+    return `<b>${r.kind.name} (${r.kind.file}), ${ver}</b> ${badge(r.status)}<br>`;
   }
 
-  function siteState(bytes, site) {
-    if (eq(bytes, site.old)) return 'old';
-    if (eq(bytes, NEW)) return 'new';
-    return 'other';
+  function body(r) {
+    const untested = r.status === 'tested' ? '' : ' This version hasn\'t been tested on a Switch yet, so keep your original file.';
+    if (r.patched === 0) return `Patch applied at ${r.sites.length} spots. Download your patched file below.${untested}`;
+    if (r.patched < r.sites.length) return `This file was only half patched. The missing spot has now been patched too.${untested}`;
+    const back = r.canRestore
+      ? ' Need the original back? Download it below.'
+      : ' Want the original back? Use your backup or download Requiem again. This version isn\'t in the list yet, so the page can\'t restore it.';
+    return `This file is already patched. Nothing to do, just set the FOV in your config (step 2).${back}`;
   }
 
-  async function detect(blob) {
-    for (const p of PROFILES) {
-      if (blob.size !== p.size) continue;
-      const bytes = await Promise.all(p.sites.map(site => readSite(blob, site)));
-      const state = p.sites.map((site, i) => siteState(bytes[i], site));
-      if (state.includes('other')) continue;
-      return { p, state };
-    }
-    return null;
+  const nameHint = (r, f) => f.toLowerCase() === r.kind.file ? '' :
+    ` <span class="muted">(Note: this is ${r.kind.name}, but the file is called “${esc(f)}”. Name it <code>${r.kind.file}</code> on the SD.)</span>`;
+
+  function addDownload(actions, blob, label, file, secondary) {
+    const url = URL.createObjectURL(blob);
+    urls.push(url);
+    const a = document.createElement('a');
+    a.className = secondary ? 'btn secondary' : 'btn';
+    a.href = url; a.download = file; a.textContent = label;
+    actions.append(a);
   }
 
-  // Builds the patched file from slices of the original plus the new instruction bytes.
-  function buildPatched(file, sites) {
-    const parts = [];
-    let pos = 0;
-    for (const site of [...sites].sort((a, b) => a.off - b.off)) {
-      parts.push(file.slice(pos, site.off), new Uint8Array(NEW));
-      pos = site.off + NEW.length;
-    }
-    parts.push(file.slice(pos));
-    return new Blob(parts, { type: 'application/octet-stream' });
+  function newResult(name) {
+    const el = document.createElement('div');
+    el.className = 'result';
+    el.innerHTML = '<output class="status show info"></output><div class="actions"></div>';
+    resultsEl.append(el);
+    const status = el.firstChild, actions = el.lastChild;
+    const set = (kind, html) => { status.className = 'status show ' + kind; status.innerHTML = html; };
+    set('info', MSG.reading(name));
+    return { set, actions };
   }
 
-  async function handle(file) {
-    showDownload(false);
-    if (dlUrl) { URL.revokeObjectURL(dlUrl); dlUrl = null; }
-    if (!/\.nro$/i.test(file.name)) { setStatus('err', MSG.notnro()); return; }
-    setStatus('info', MSG.reading());
+  function refusal(err, file) {
+    if (err instanceof P.PatchError) return err.code === 'notnro' ? MSG.notnro(file.name) : MSG.refused(file.name, file.size);
+    console.error(err);
+    return MSG.readerr(file.name);
+  }
+
+  async function handleOne(file) {
+    const ui = newResult(file.name);
+    let lastPct = -1;
+    const onProgress = p => {
+      const pct = Math.floor(p * 100);
+      if (pct !== lastPct) { lastPct = pct; ui.set('info', MSG.reading(file.name, pct)); }
+    };
     try {
-      const hit = await detect(file);
-      if (!hit) { setStatus('err', MSG.unknown(file.size)); return; }
-      const { p, state } = hit;
-      const hint = file.name.toLowerCase() === p.file ? '' : nameHint(p, file.name);
-      setMode(p.id);
-      const todo = state.filter(x => x === 'old').length;
-      if (todo === 0) { setStatus('ok', MSG.already(p) + hint); return; }
-      const patched = buildPatched(file, p.sites);
-      const check = await detect(patched);
-      if (!check || check.state.some(x => x !== 'new')) { setStatus('err', MSG.readerr()); return; }
-      dlUrl = URL.createObjectURL(patched);
-      dl.href = dlUrl; dl.download = p.file; showDownload(true);
-      setStatus('ok', (todo === p.sites.length ? MSG.ok(p, todo) : MSG.partial(p)) + hint);
+      const r = await P.analyze(file, { onProgress });
+      const hint = nameHint(r, file.name);
+      if (r.patched < r.sites.length) {
+        const out = P.patch(file, r);
+        if (!(await P.verify(out, r, () => P.NEW))) throw new Error('patched file failed verification');
+        addDownload(ui.actions, out, 'Download patched file', r.kind.file, false);
+      }
+      if (r.canRestore) {
+        const orig = P.restore(file, r);
+        if (!(await P.verify(orig, r, i => r.known.sites[i].old))) throw new Error('restored file failed verification');
+        addDownload(ui.actions, orig, 'Download original file', r.kind.file, r.patched < r.sites.length);
+      }
+      ui.set(r.status === 'auto' && r.patched === 0 ? 'warn' : 'ok', title(r) + body(r) + hint);
+      return r;
     } catch (err) {
-      console.error(err);
-      setStatus('err', MSG.readerr());
+      ui.actions.replaceChildren();
+      ui.set('err', refusal(err, file));
+      return null;
     }
+  }
+
+  async function handleFiles(list) {
+    const files = [...list];
+    if (!files.length) return;
+    urls.forEach(u => URL.revokeObjectURL(u));
+    urls = [];
+    resultsEl.replaceChildren();
+    dlHint.hidden = true;
+    if (files.length > MAX_FILES) newResult('').set('warn', MSG.toomany(files.length));
+    for (const f of files.slice(0, MAX_FILES)) {
+      const r = await handleOne(f);
+      if (r) setMode(r.kind.id);
+    }
+    dlHint.hidden = urls.length === 0;
   }
 
   const input = $('file'), drop = $('drop');
   input.addEventListener('change', () => {
-    if (input.files[0]) { handle(input.files[0]); }
+    handleFiles(input.files);
     input.value = '';
   });
   ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
   ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
-  drop.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) handle(f); });
+  drop.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
   window.addEventListener('dragover', e => e.preventDefault());
   window.addEventListener('drop', e => e.preventDefault());
 
@@ -285,7 +317,7 @@ footer a,.card a:not(.btn){color:var(--accent)}
   function renderCfg() {
     const v = fov.value;
     $('cfg').textContent = `seta cg_fov "${v}"\nseta cg_fov_default "${v}"` + (mode === 'zm' ? `\nseta cg_fovScale "1"` : '');
-    $('cfgPath').textContent = '/switch/t6game/players/' + PROFILES.find(p => p.id === mode).cfg;
+    $('cfgPath').textContent = '/switch/t6game/players/' + P.KINDS[mode].cfg;
   }
   function setMode(m) {
     mode = m;
