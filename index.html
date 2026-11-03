@@ -8,7 +8,7 @@
 <meta name="color-scheme" content="light dark">
 <title>BO2 Switch FOV Patcher</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23b93d0b'/%3E%3Cpath d='M12 46 32 18l20 28' fill='none' stroke='%23fff' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='32' cy='46' r='5' fill='%23fff'/%3E%3C/svg%3E">
-<meta name="description" content="Unlock a higher FOV in BO2 Requiem NX on the Switch: patches your own t6zm.nro or t6mp.nro, locally in your browser.">
+<meta name="description" content="Unlock a higher FOV in BO2 Requiem NX on the Switch, including the FOV slider in the game's menu: patches your own files, locally in your browser.">
 <style>
 :root{
   --bg:#f4f5f7; --surface:#ffffff; --surface-2:#eef0f3; --text:#16181d; --muted:#5b6170;
@@ -81,8 +81,9 @@ input.fov-num:focus{outline:2px solid var(--accent);outline-offset:1px}
 pre{background:var(--code-bg);color:var(--code-text);border-radius:10px;padding:14px;overflow-x:auto;margin:0;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 #cfgPath{word-break:break-all}
 code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em;background:var(--surface-2);padding:1px 5px;border-radius:5px}
-ol{margin:0;padding-left:1.3em}
-ol li{margin:6px 0}
+ol,ul{margin:0;padding-left:1.3em}
+ol li,ul li{margin:6px 0}
+.where td:first-child{white-space:nowrap}
 .muted{color:var(--muted)}
 .tabs{display:flex;gap:6px;margin-bottom:10px}
 .tabs button{background:var(--surface-2);color:var(--muted);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font:inherit;font-size:.9rem;cursor:pointer}
@@ -131,16 +132,20 @@ footer a,.card a:not(.btn){color:var(--accent)}
 <div class="wrap">
   <header>
     <h1>BO2 Switch <span>FOV patcher</span></h1>
-    <p class="lede">Higher FOV (120 and beyond) in BO2 Requiem NX for both Zombies and Multiplayer. Everything happens in your own browser: your file is never uploaded.</p>
+    <p class="lede">Higher FOV (up to 160) in BO2 Requiem NX for both Zombies and Multiplayer, and an FOV slider in the game's options menu that goes just as high. Everything happens in your own browser: your files are never uploaded.</p>
   </header>
 
   <section class="card">
-    <h2><span class="step">1</span><span>Pick your .nro file</span></h2>
-    <p class="muted" style="margin-top:0">Take <code>t6zm.nro</code> (Zombies) or <code>t6mp.nro</code> (Multiplayer) from <code>/switch/t6game/</code> on your SD card. <b>Keep a copy of the original first.</b></p>
+    <h2><span class="step">1</span><span>Pick your files</span></h2>
+    <p style="margin-top:0">There are two kinds of files, both on your SD card.</p>
+    <ul style="margin-bottom:14px">
+      <li><b>The game</b> (needed): <code>t6zm.nro</code> (Zombies) and/or <code>t6mp.nro</code> (Multiplayer), from <code>/switch/t6game/</code>. This removes the 90 limit, so the game accepts an FOV up to 160.</li>
+      <li><b>The menu</b> (recommended): <code>patch_zm.ff</code> and/or <code>patch_mp.ff</code>, from <code>/switch/t6game/zone/all/</code>. This makes the FOV slider in the game's options go up to the FOV you pick in step 2. Without it the slider stops at 90, so changing your FOV in the game sets it back to 90 or lower.</li>
+    </ul>
     <label class="drop" id="drop">
       <input type="file" id="file" multiple>
       <strong><span class="pointer-only">Drop your files here or click to choose</span><span class="touch-only">Tap to choose your files</span></strong>
-      <small>Zombies or Multiplayer is detected by itself. You can add both files at once.</small>
+      <small>The page recognises each file by itself. You can add up to 4 files at once (both .nro files and both .ff files).</small>
     </label>
     <div class="results" id="results" aria-live="polite"></div>
     <p class="muted small touch-only" id="dlHint" hidden style="margin:10px 0 0">On a phone the file is saved to your Downloads (the Files app on iPhone). Copy it to the SD card from there.</p>
@@ -148,7 +153,8 @@ footer a,.card a:not(.btn){color:var(--accent)}
 
   <section class="card">
     <h2><span class="step">2</span><span>Set your FOV in the config</span></h2>
-    <p class="muted" style="margin-top:0">The patch only removes the 90 limit. You set the FOV itself with these lines. Replace any existing <code>cg_fov</code> lines, or add them.</p>
+    <p class="muted" style="margin-top:0">The patch only removes the 90 limit. You set your starting FOV with these lines. Replace any existing <code>cg_fov</code> lines, or add them. With the menu file patched you can also change it later in the game's options.</p>
+    <p class="muted">The FOV you pick here is also the highest value of the FOV slider in the menu files (<code>patch_zm.ff</code> / <code>patch_mp.ff</code>) from step 1. Change it, and their download is updated.</p>
     <div class="row">
       <div class="fov"><label for="fovNum">FOV</label><input type="range" id="fov" min="65" max="160" step="1" value="120" aria-label="FOV slider"><input type="number" class="fov-num" id="fovNum" min="65" max="160" step="1" value="120" inputmode="numeric" aria-label="FOV value (65 to 160)"></div>
       <button type="button" class="btn secondary" id="copy">Copy</button>
@@ -165,10 +171,18 @@ footer a,.card a:not(.btn){color:var(--accent)}
     <h2><span class="step">3</span><span>Back on the Switch</span></h2>
     <ol>
       <li><b>Updating Requiem?</b> Copy the whole new release to the SD card first, including <code>t6game.nro</code> (the launcher). Otherwise the game says it's out of date.</li>
-      <li>Put the downloaded file back in <code>/switch/t6game/</code>, with exactly the same name (<code>t6zm.nro</code> or <code>t6mp.nro</code>).</li>
+      <li>Put each downloaded file back in the same folder it came from, with exactly the same name, and replace the file that's there:
+        <table class="where" style="margin-top:6px">
+          <thead><tr><th>File</th><th>Folder on the SD card</th></tr></thead>
+          <tbody>
+            <tr><td><code>t6zm.nro</code><br><code>t6mp.nro</code></td><td><code>/switch/t6game/</code></td></tr>
+            <tr><td><code>patch_zm.ff</code><br><code>patch_mp.ff</code></td><td><code>/switch/t6game/zone/all/</code></td></tr>
+          </tbody>
+        </table>
+      </li>
       <li>Edit the config as shown in step 2.</li>
-      <li>Start the game.</li>
-      <li>Want to undo it? Put your original file back. Lost it? Drop the patched file in here and download the original.</li>
+      <li>Start the game. The FOV slider is under Options in the game's menu.</li>
+      <li>Want to undo it? Put your original files back. Lost them? Drop the patched file in here: for a .nro you get the original back, for a .ff you get a copy with the normal slider (up to 90).</li>
     </ol>
   </section>
 
@@ -183,7 +197,9 @@ footer a,.card a:not(.btn){color:var(--accent)}
 
   <section class="card">
     <h2>What gets changed?</h2>
-    <p style="margin:0">The engine won't accept a value above 90 for <code>cg_fov</code> and <code>cg_fov_default</code>. At two spots one 4-byte instruction is replaced so the limit becomes 160. Nothing else changes: the file stays the same size, and the patch only affects your own view.</p>
+    <p style="margin:0 0 10px"><b>The game (.nro):</b> the engine won't accept a value above 90 for <code>cg_fov</code> and <code>cg_fov_default</code>. At two spots one 4-byte instruction is replaced so the limit becomes 160. Nothing else changes, and the file stays the same size.</p>
+    <p style="margin:0 0 10px"><b>The menu (.ff):</b> the options menu creates the FOV slider with a range of 65 to 90. The patch changes that 90 into the FOV you pick in step 2 (at most 160, the engine limit). These files are packed and encrypted, so the page unpacks the file, changes that one number and packs it again. The original files are signed by Treyarch, and a changed file can't keep that signature, so it's saved as an unsigned file, the same kind mods use. The game loads it the same way. The file gets a little smaller, because it's packed again.</p>
+    <p style="margin:0">Both patches only affect your own view.</p>
   </section>
 
   <footer>
@@ -193,9 +209,10 @@ footer a,.card a:not(.btn){color:var(--accent)}
 </div>
 
 <script src="patcher.js"></script>
+<script src="fastfile.js"></script>
 <script>
 (() => {
-  const P = window.FovPatcher;
+  const P = window.FovPatcher, F = window.FovFastfile;
   const RELEASES = 'https://github.com/HDErick/BO2-Requiem-NX/releases';
   const REPO = 'https://github.com/HolyJoey/BO2-switch-fov';
   const MAX_FILES = 4;
@@ -221,14 +238,18 @@ footer a,.card a:not(.btn){color:var(--accent)}
       `<td>${badge(status)}${k.tested ? '' : '<br><span class="muted small">Not tested in game yet</span>'}</td></tr>`;
   }).join('') +
     '<tr><td>Both files<br><span class="muted">Zombies and Multiplayer</span></td>' +
-    `<td>Newer releases<br><span class="muted">any size</span></td><td>${badge('auto')}</td></tr>`;
+    `<td>Newer releases<br><span class="muted">any size</span></td><td>${badge('auto')}</td></tr>` +
+    '<tr><td><code>patch_zm.ff</code> and <code>patch_mp.ff</code><br><span class="muted">The menu</span></td>' +
+    `<td>BO2 PC game data<br><span class="muted">the files you add to Requiem yourself</span></td><td>${badge('tested')}</td></tr>`;
 
   const MSG = {
     reading: (name, pct) => `Reading <b>${esc(name)}</b>…` + (pct ? ' ' + pct + '%' : ''),
-    notnro: name => `<b>${esc(name)} isn't an .nro file.</b> Pick <code>t6zm.nro</code> or <code>t6mp.nro</code>.`,
+    notnro: name => `<b>${esc(name)} isn't a file this page can patch.</b> Pick <code>t6zm.nro</code> / <code>t6mp.nro</code> (from <code>/switch/t6game/</code>) or <code>patch_zm.ff</code> / <code>patch_mp.ff</code> (from <code>/switch/t6game/zone/all/</code>).`,
     refused: (name, size) => `<b>${esc(name)}: FOV code not found.</b> This file (${bytes(size)} bytes) isn't a Requiem <code>t6zm.nro</code> or <code>t6mp.nro</code>, or this Requiem version changed the code too much. Nothing was changed. (<code>t6game.nro</code> is the launcher and doesn't need patching.) If it is a Requiem file, please report it so the page can be updated.`,
     readerr: name => `<b>${esc(name)} could not be read.</b> Please try again.`,
     toomany: n => `You added ${n} files. Only the first ${MAX_FILES} are handled.`,
+    ffzone: name => `<b>${esc(name)} isn't one of the menu files.</b> Only <code>patch_zm.ff</code> and <code>patch_mp.ff</code> from <code>/switch/t6game/zone/all/</code> need patching. Nothing was changed.`,
+    ffrefused: (name, size) => `<b>${esc(name)}: FOV slider not found.</b> This file (${bytes(size)} bytes) looks like a menu file, but the slider isn't where the page expects it. Nothing was changed. Please report it so the page can be updated.`,
   };
 
   function title(r) {
@@ -238,7 +259,8 @@ footer a,.card a:not(.btn){color:var(--accent)}
 
   function body(r) {
     const untested = r.status === 'tested' ? '' : ' This version hasn\'t been tested on a Switch yet, so keep your original file.';
-    if (r.patched === 0) return `Patch applied at ${r.sites.length} spots. Download your patched file below.${untested}`;
+    const where = ` Put it in <code>/switch/t6game/</code> on your SD card, with the name <code>${r.kind.file}</code>, and replace the file that's there.`;
+    if (r.patched === 0) return `Patch applied at ${r.sites.length} spots. Download your patched file below.${where}${untested}`;
     if (r.patched < r.sites.length) return `This file was only half patched. The missing spot has now been patched too.${untested}`;
     const back = r.canRestore
       ? ' Need the original back? Download it below.'
@@ -270,7 +292,12 @@ footer a,.card a:not(.btn){color:var(--accent)}
   }
 
   function refusal(err, file) {
-    if (err instanceof P.PatchError) return err.code === 'notnro' ? MSG.notnro(file.name) : MSG.refused(file.name, file.size);
+    if (err instanceof P.PatchError) {
+      if (err.code === 'notnro') return MSG.notnro(file.name);
+      if (err.code === 'ffzone') return MSG.ffzone(file.name);
+      if (err.code === 'ffcorrupt' || err.code === 'noslider') return MSG.ffrefused(file.name, file.size);
+      return MSG.refused(file.name, file.size);
+    }
     console.error(err);
     return MSG.readerr(file.name);
   }
@@ -311,7 +338,7 @@ footer a,.card a:not(.btn){color:var(--accent)}
     return [
       'File: ' + file.name,
       'Size: ' + bytes(file.size) + ' bytes',
-      'Requiem version in the file: ' + (info.version || 'not found'),
+      info.zone ? 'Zone: ' + info.zone : 'Requiem version in the file: ' + (info.version || 'not found'),
       'Reason: ' + err.code + ' (' + err.message + ')',
       'Engine (ELF) at: ' + (info.engine === undefined ? 'not found' : P.hex(info.engine)),
     ].join('\n');
@@ -347,6 +374,85 @@ footer a,.card a:not(.btn){color:var(--accent)}
     ui.actions.append(copy, report);
   }
 
+  // ---- menu files (patch_zm.ff / patch_mp.ff) ----
+  // The slider max follows the FOV picked in step 2 (never below the stock 90), so the file is
+  // built again whenever that FOV changes.
+
+  let ffEntries = [];
+  const sliderMax = () => Math.max(F.OLD_MAX, Number($('fov').value));
+  const fl = v => { const b = new Uint8Array(4); new DataView(b.buffer).setFloat32(0, v, true); return `<code>${bytesHex([...b])}</code> <span class="muted">(${v})</span>`; };
+
+  function ffBody(r, max) {
+    const where = ` Put it in <code>/switch/t6game/zone/all/</code> on your SD card, with the name <code>${r.kind.file}</code>, and replace the file that's there.`;
+    const follows = ` <span class="muted">The slider max is the FOV from step 2: change it there and this file is updated.</span>`;
+    const back = ` Want the normal slider back? Use your backup, or download a copy with the slider up to ${F.OLD_MAX} below.`;
+    if (r.max === F.OLD_MAX) {
+      if (max === F.OLD_MAX) return `This file has the normal slider (up to ${F.OLD_MAX}). Pick an FOV above ${F.OLD_MAX} in step 2 to raise it.`;
+      return `The FOV slider in the game's options menu now goes up to <b>${max}</b> (was ${F.OLD_MAX}). Download the patched file below.${where}${follows}`;
+    }
+    if (r.max === max) return `This file is already patched: the FOV slider in the menu goes up to ${max}, the same as the FOV in step 2. Nothing to do.${back}`;
+    return `This file is already patched with a slider up to ${r.max}. Download it below to change that to <b>${max}</b>, the FOV from step 2.${where}${back}`;
+  }
+
+  function ffTech(r, max) {
+    const rows = [
+      ['File size', bytes(r.size) + ' bytes'],
+      ['Zone', `<code>${r.kind.zone}</code> (${r.kind.name} menu)`],
+      ['Format', r.signed ? 'Signed by Treyarch (<code>TAff0100</code>). The patched file is unsigned (<code>TAffu100</code>), like mod files.' : 'Unsigned (<code>TAffu100</code>)'],
+      ['What changes', `Maximum of the FOV slider (<code>cg_fov_default</code>) in the options menu: <b>${r.max} → ${max}</b>`],
+      ['Where', `chunk ${r.chunk + 1} of ${r.chunkCount}, offset <code>${P.hex(r.offset)}</code> in the unpacked chunk`],
+      ['Slider max', `<span class="change"><span class="lbl">Before</span><span>${fl(r.max)}</span><span class="lbl">After</span><span>${fl(max)}</span></span>`],
+    ];
+    const d = document.createElement('details');
+    d.className = 'tech';
+    d.innerHTML = '<summary>Technical details</summary><dl class="kv">' +
+      rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('') + '</dl>';
+    return d;
+  }
+
+  async function build(r, max) {
+    const out = await F.withMax(r, max);
+    if (!(await F.verify(out, r, max))) throw new Error('patched fastfile failed verification');
+    return out;
+  }
+
+  async function renderFastfile(e) {
+    const { r, ui, file } = e;
+    const max = sliderMax(), token = ++e.token;
+    const patched = r.max !== max ? await build(r, max) : null;
+    const normal = r.max !== F.OLD_MAX && max !== F.OLD_MAX ? await build(r, F.OLD_MAX) : null;
+    if (token !== e.token) return; // the FOV changed again while building
+    e.urls.forEach(u => URL.revokeObjectURL(u));
+    const before = urls.length;
+    ui.actions.replaceChildren();
+    if (patched) addDownload(ui.actions, patched, `Download patched ${r.kind.file} (slider up to ${max})`, r.kind.file, false);
+    if (normal) addDownload(ui.actions, normal, `Download ${r.kind.file} with the normal slider (up to ${F.OLD_MAX})`, r.kind.file, true);
+    e.urls = urls.slice(before);
+    ui.set('ok', `<b>${r.kind.name} menu (${r.kind.file})</b> ${badge('tested')}<br>` + ffBody(r, max) + nameHint(r, file.name));
+    const wasOpen = Boolean(ui.extra.querySelector('details')?.open);
+    const d = ffTech(r, max);
+    d.open = wasOpen;
+    ui.extra.replaceChildren(d);
+  }
+
+  async function handleFastfile(file, ui, onProgress) {
+    const r = await F.analyze(file, { onProgress, fileName: file.name });
+    const e = { r, ui, file, token: 0, urls: [] };
+    await renderFastfile(e);
+    ffEntries.push(e);
+    return r;
+  }
+
+  let ffTimer = null;
+  function refreshFastfiles() {
+    clearTimeout(ffTimer);
+    ffTimer = setTimeout(() => ffEntries.forEach(e => renderFastfile(e).catch(err => {
+      console.error(err);
+      e.ui.actions.replaceChildren();
+      e.ui.set('err', MSG.readerr(e.file.name));
+    })), 250);
+  }
+
   async function handleOne(file) {
     const ui = newResult(file.name);
     let lastPct = -1;
@@ -355,6 +461,7 @@ footer a,.card a:not(.btn){color:var(--accent)}
       if (pct !== lastPct) { lastPct = pct; ui.set('info', MSG.reading(file.name, pct)); }
     };
     try {
+      if (await F.isFastfile(file)) return await handleFastfile(file, ui, onProgress);
       const r = await P.analyze(file, { onProgress });
       const hint = nameHint(r, file.name);
       if (r.patched < r.sites.length) {
@@ -373,7 +480,7 @@ footer a,.card a:not(.btn){color:var(--accent)}
     } catch (err) {
       ui.actions.replaceChildren();
       ui.set('err', refusal(err, file));
-      if (err instanceof P.PatchError && err.code !== 'notnro') addReport(ui, err, file);
+      if (err instanceof P.PatchError && err.code !== 'notnro' && err.code !== 'ffzone') addReport(ui, err, file);
       return null;
     }
   }
@@ -384,6 +491,7 @@ footer a,.card a:not(.btn){color:var(--accent)}
     urls.forEach(u => URL.revokeObjectURL(u));
     urls = [];
     resultsEl.replaceChildren();
+    ffEntries = [];
     dlHint.hidden = true;
     if (files.length > MAX_FILES) newResult('').set('warn', MSG.toomany(files.length));
     for (const f of files.slice(0, MAX_FILES)) {
@@ -418,17 +526,17 @@ footer a,.card a:not(.btn){color:var(--accent)}
     renderCfg();
   }
   document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
-  fov.addEventListener('input', () => { fovNum.value = fov.value; renderCfg(); });
+  fov.addEventListener('input', () => { fovNum.value = fov.value; renderCfg(); refreshFastfiles(); });
   // Typing: follow along as soon as the value is a valid FOV, without fighting half-typed numbers.
   fovNum.addEventListener('input', () => {
     const v = Number(fovNum.value);
-    if (Number.isInteger(v) && v >= FOV_MIN && v <= FOV_MAX) { fov.value = String(v); renderCfg(); }
+    if (Number.isInteger(v) && v >= FOV_MIN && v <= FOV_MAX) { fov.value = String(v); renderCfg(); refreshFastfiles(); }
   });
   // Leaving the field: clamp out-of-range or empty input to a valid value.
   fovNum.addEventListener('change', () => {
     const v = Math.round(Number(fovNum.value));
     const clamped = Number.isFinite(v) && fovNum.value !== '' ? Math.min(FOV_MAX, Math.max(FOV_MIN, v)) : Number(fov.value);
-    fovNum.value = String(clamped); fov.value = String(clamped); renderCfg();
+    fovNum.value = String(clamped); fov.value = String(clamped); renderCfg(); refreshFastfiles();
   });
   $('copy').addEventListener('click', async () => {
     const btn = $('copy');

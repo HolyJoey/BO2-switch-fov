@@ -1,11 +1,13 @@
 # BO2 Switch FOV Patcher
 
-A small web page that unlocks a higher field of view (120 and beyond) in
+A small web page that unlocks a higher field of view (up to 160) in
 [BO2 Requiem NX](https://github.com/HDErick/BO2-Requiem-NX), the Nintendo Switch port of
-Black Ops II, for both **Zombies** and **Multiplayer**.
+Black Ops II, for both **Zombies** and **Multiplayer**, and makes the FOV slider in the game's
+options menu go just as high.
 
-The page patches your own `t6zm.nro` or `t6mp.nro` locally in your browser. Your file is
-never uploaded anywhere, and this repository does not contain or distribute any Requiem files.
+The page patches your own `t6zm.nro` / `t6mp.nro` (the game) and `patch_zm.ff` / `patch_mp.ff`
+(the menu) locally in your browser. Your files are never uploaded anywhere, and this repository
+does not contain or distribute any Requiem or game files.
 
 **Use it here:** https://holyjoey.github.io/BO2-switch-fov/
 
@@ -16,23 +18,34 @@ Works in any modern browser, on desktop and on phones.
 1. Download Requiem from the [official releases](https://github.com/HDErick/BO2-Requiem-NX/releases)
    and set it up as usual. **Updating?** Copy the whole new release to the SD card first,
    including `t6game.nro` (the launcher), otherwise the game says it's out of date.
-2. Copy `t6zm.nro` (Zombies) or `t6mp.nro` (Multiplayer) from `/switch/t6game/` on your SD
-   card to your PC or phone. **Keep a backup of the original.**
-3. Open the page and drop the file in (or tap to choose it on a phone). You can add both files
-   at once. It detects Zombies or Multiplayer from the file's contents, patches it and gives you
-   the patched file to download. Open *Technical details* under a result to see exactly which
-   bytes change.
-4. Put the patched file back in `/switch/t6game/` with the same name.
-5. Pick your FOV on the page (use the slider or type a value from 65 to 160) and copy the lines
-   into `/switch/t6game/players/config_zm.cfg` or `config_mp.cfg`. For 120 they look like this:
+2. Copy these files from your SD card to your PC or phone. **Keep a backup of the originals.**
+   - `t6zm.nro` (Zombies) and/or `t6mp.nro` (Multiplayer) from `/switch/t6game/` (needed).
+   - `patch_zm.ff` and/or `patch_mp.ff` from `/switch/t6game/zone/all/` (recommended: without
+     them the FOV slider in the game's menu stops at 90).
+3. Open the page, pick your FOV (use the slider or type a value from 65 to 160) and drop the
+   files in (or tap to choose them on a phone). You can add up to 4 files at once. The page
+   recognises each file from its contents, patches it and gives you the patched file to
+   download. The FOV you pick is also the highest value of the slider in the menu files; change
+   it and their download is updated. Open *Technical details* under a result to see exactly
+   what changes.
+4. Put each patched file back where it came from, with the same name, replacing the one there:
+
+   | File | Folder on the SD card |
+   |---|---|
+   | `t6zm.nro`, `t6mp.nro` | `/switch/t6game/` |
+   | `patch_zm.ff`, `patch_mp.ff` | `/switch/t6game/zone/all/` |
+
+5. Copy the config lines from the page into `/switch/t6game/players/config_zm.cfg` or
+   `config_mp.cfg`. For 120 they look like this:
 
    ```
    seta cg_fov "120"
    seta cg_fov_default "120"
    ```
 
-To undo it, put your original file back. Lost your backup? Drop the patched file into the page
-and it gives you the original back (for the builds listed below).
+To undo it, put your original files back. Lost your backup? Drop the patched file into the page:
+for a `.nro` it gives you the original back (for the builds listed below), for a `.ff` a copy
+with the normal slider (up to 90).
 
 ## Supported versions
 
@@ -44,6 +57,7 @@ and it gives you the original back (for the builds listed below).
 | `t6mp.nro` (Multiplayer) | 0.3.0 | 84,911,876 | Tested on Switch |
 | `t6zm.nro` (Zombies) | [0.2.5](https://github.com/HDErick/BO2-Requiem-NX/releases/tag/0.2.5) | 51,335,533 | Tested on Switch |
 | `t6mp.nro` (Multiplayer) | [0.2.5](https://github.com/HDErick/BO2-Requiem-NX/releases/tag/0.2.5) | 83,981,876 | Tested on Switch |
+| `patch_zm.ff`, `patch_mp.ff` (the menu) | BO2 PC game data (not part of Requiem) | any | Tested on Switch |
 
 **Other and newer versions are detected automatically.** Each Requiem update shifts the code, so
 the page looks for the FOV code in your file by itself: it finds the embedded engine, the
@@ -104,8 +118,29 @@ the engine's code (about 8 MB) to find the offsets, which takes a second or so. 
 builds the patched file from pieces of your original and checks the result before you can
 download it, so even the 84 MB Multiplayer file never has to be loaded into memory whole.
 
-The detection and patching code is in [`patcher.js`](patcher.js), the page is
-[`index.html`](index.html).
+### The menu slider (`patch_zm.ff` / `patch_mp.ff`)
+
+The NRO patch raises the engine limit, but the options menu has its own range for the slider.
+The menu is Lua code compiled into `patch_zm.ff` and `patch_mp.ff`, which come from your own BO2
+PC game data (Requiem doesn't ship them). It creates the slider with
+`addHardwareProfileLeftRightSlider(..., "cg_fov_default", 65, 90, ...)`, and the patch changes that
+90 into the FOV you pick (a 32-bit float, at most 160).
+
+These fastfiles are split into chunks of at most 32 KB over 4 streams. Each chunk is
+deflate-compressed and then Salsa20-encrypted, with an IV that depends on the zone name and on
+the SHA-1 of the earlier chunks of the same stream (the scheme
+[OpenAssetTools](https://github.com/Laupetin/OpenAssetTools) documents). The page decrypts and
+unpacks the file, requires exactly one match of the slider's constants
+(`"cg_fov_default"`, 65, then the max), changes the max, compresses that one chunk again and
+encrypts the whole chain again. It then reads its own output back to check the result.
+
+The stock files are signed by Treyarch (`TAff0100`). A changed file can't keep that signature,
+so it's written as an unsigned zone (`TAffu100`), the format mod fastfiles use, which the game
+loads without a signature check. Tested on a Switch with Requiem 0.3.1, in Zombies and
+Multiplayer.
+
+The detection and patching code is in [`patcher.js`](patcher.js) (the `.nro`) and
+[`fastfile.js`](fastfile.js) (the menu), the page is [`index.html`](index.html).
 
 ## Credits
 
