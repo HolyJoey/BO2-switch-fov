@@ -90,7 +90,7 @@ ol li,ul li{margin:6px 0}
 .case p:last-child{margin-bottom:0}
 .case .where{margin-top:4px}
 h3.sub{font-size:1rem;margin:20px 0 0}
-.zipbox{margin-top:14px;padding-top:2px;border-top:1px solid var(--border)}
+.zipbox{margin-top:14px;padding:2px 16px 16px;border:1px solid var(--accent);border-radius:var(--radius);background:var(--surface-2)}
 .zipbox p{margin:8px 0 0}
 .muted{color:var(--muted)}
 .tabs{display:flex;gap:6px;margin-bottom:10px}
@@ -163,11 +163,12 @@ footer a,.card a:not(.btn){color:var(--accent)}
       <strong><span class="pointer-only">Drop your files here or click to choose</span><span class="touch-only">Tap to choose your files</span></strong>
       <small>The page recognises each file by itself. You can add up to 4 files at once (both .nro files and both .ff files).</small>
     </label>
-    <div class="results" id="results" aria-live="polite"></div>
     <div class="zipbox" id="zipBox" hidden>
       <button type="button" class="btn" id="zipBtn">Download everything as one zip</button>
       <p class="muted small" id="zipList"></p>
+      <p class="muted small">Or download the files one by one below.</p>
     </div>
+    <div class="results" id="results" aria-live="polite"></div>
     <p class="muted small touch-only" id="dlHint" hidden style="margin:10px 0 0">On a phone the file is saved to your Downloads (the Files app on iPhone). Copy it to the SD card from there.</p>
   </section>
 
