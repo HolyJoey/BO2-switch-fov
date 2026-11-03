@@ -217,7 +217,7 @@ footer a,.card a:not(.btn){color:var(--accent)}
   $('versions').innerHTML = P.KNOWN.filter(k => !k.hidden).map(k => {
     const kind = P.KINDS[k.kind], status = k.tested ? 'tested' : 'verified';
     return `<tr><td><code>${kind.file}</code><br><span class="muted">${kind.name}</span></td>` +
-      `<td><a href="${RELEASES}/tag/${k.build}" rel="noopener">${k.build}</a>${k.note ? ' <span class="muted small">(' + k.note + ')</span>' : ''}<br><span class="muted">${bytes(k.size)} bytes</span></td>` +
+      `<td>${k.gone ? k.build : `<a href="${RELEASES}/tag/${k.build}" rel="noopener">${k.build}</a>`}${k.note ? ' <span class="muted small">(' + k.note + ')</span>' : ''}<br><span class="muted">${bytes(k.size)} bytes</span></td>` +
       `<td>${badge(status)}${k.tested ? '' : '<br><span class="muted small">Not tested in game yet</span>'}</td></tr>`;
   }).join('') +
     '<tr><td>Both files<br><span class="muted">Zombies and Multiplayer</span></td>' +

@@ -38,8 +38,10 @@ and it gives you the original back (for the builds listed below).
 
 | File | Requiem release | Size (bytes) | Status |
 |---|---|---|---|
-| `t6zm.nro` (Zombies) | [0.3.0](https://github.com/HDErick/BO2-Requiem-NX/releases/tag/0.3.0) | 52,277,821 | Tested on Switch |
-| `t6mp.nro` (Multiplayer) | [0.3.0](https://github.com/HDErick/BO2-Requiem-NX/releases/tag/0.3.0) | 84,911,876 | Tested on Switch |
+| `t6zm.nro` (Zombies) | [0.3.1](https://github.com/HDErick/BO2-Requiem-NX/releases/tag/0.3.1) | 52,290,109 | Tested on Switch |
+| `t6mp.nro` (Multiplayer) | [0.3.1](https://github.com/HDErick/BO2-Requiem-NX/releases/tag/0.3.1) | 84,924,164 | Tested on Switch |
+| `t6zm.nro` (Zombies) | 0.3.0 | 52,277,821 | Tested on Switch |
+| `t6mp.nro` (Multiplayer) | 0.3.0 | 84,911,876 | Tested on Switch |
 | `t6zm.nro` (Zombies) | [0.2.5](https://github.com/HDErick/BO2-Requiem-NX/releases/tag/0.2.5) | 51,335,533 | Tested on Switch |
 | `t6mp.nro` (Multiplayer) | [0.2.5](https://github.com/HDErick/BO2-Requiem-NX/releases/tag/0.2.5) | 83,981,876 | Tested on Switch |
 
@@ -51,7 +53,7 @@ Those builds are marked *Auto-detected* until they've been tested on a Switch. I
 isn't found, the file is refused and nothing gets changed.
 
 Auto-detection gives the same offsets as the hand-checked ones for every release so far
-(0.0.1, 0.2.2 to 0.2.5 and both uploads of 0.3.0). The page can only restore an original for
+(0.0.1, 0.2.2 to 0.2.5, both uploads of 0.3.0 and 0.3.1). The page can only restore an original for
 the builds in the table (and the first upload of 0.3.0, which was replaced under the same tag),
 because for other builds it doesn't know the original bytes once a file is patched.
 
@@ -79,6 +81,10 @@ from the game itself.
 
 | File | Release | Setting | File offset | Original bytes | Patched bytes |
 |---|---|---|---|---|---|
+| `t6zm.nro` | 0.3.1 | `cg_fov` max | `0x219F9B9` | `80 5A 49 B9` | `00 64 A8 52` |
+| `t6zm.nro` | 0.3.1 | `cg_fov_default` max | `0x248AAA5` | `00 80 42 B9` | `00 64 A8 52` |
+| `t6mp.nro` | 0.3.1 | `cg_fov` max | `0x40B3BB0` | `80 DA 4B B9` | `00 64 A8 52` |
+| `t6mp.nro` | 0.3.1 | `cg_fov_default` max | `0x4399E5C` | `00 00 45 B9` | `00 64 A8 52` |
 | `t6zm.nro` | 0.3.0 | `cg_fov` max | `0x219D619` | `80 DA 44 B9` | `00 64 A8 52` |
 | `t6zm.nro` | 0.3.0 | `cg_fov_default` max | `0x24886E5` | `00 00 4E B9` | `00 64 A8 52` |
 | `t6mp.nro` | 0.3.0 | `cg_fov` max | `0x40B1810` | `80 5A 47 B9` | `00 64 A8 52` |

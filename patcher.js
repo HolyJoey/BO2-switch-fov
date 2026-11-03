@@ -32,10 +32,15 @@
   // Builds whose offsets have been checked by hand. Auto-detection handles every other build;
   // this list adds the release tag, the "tested" status and the original bytes for restoring.
   // size + crc (CRC-32 of the stock file) let the release check recognise a build from the zip.
+  // gone: the release was removed from GitHub, so the versions table doesn't link to it.
   const KNOWN = [
-    { kind: 'zm', build: '0.3.0', size: 52277821, crc: 0xb076df13, tested: true,
+    { kind: 'zm', build: '0.3.1', size: 52290109, crc: 0x40f1c80b, tested: true,
+      sites: [{ off: 0x219f9b9, old: [0x80, 0x5a, 0x49, 0xb9] }, { off: 0x248aaa5, old: [0x00, 0x80, 0x42, 0xb9] }] },
+    { kind: 'mp', build: '0.3.1', size: 84924164, crc: 0xe3034590, tested: true,
+      sites: [{ off: 0x40b3bb0, old: [0x80, 0xda, 0x4b, 0xb9] }, { off: 0x4399e5c, old: [0x00, 0x00, 0x45, 0xb9] }] },
+    { kind: 'zm', build: '0.3.0', gone: true, size: 52277821, crc: 0xb076df13, tested: true,
       sites: [{ off: 0x219d619, old: [0x80, 0xda, 0x44, 0xb9] }, { off: 0x24886e5, old: [0x00, 0x00, 0x4e, 0xb9] }] },
-    { kind: 'mp', build: '0.3.0', size: 84911876, crc: 0x77b22d66, tested: true,
+    { kind: 'mp', build: '0.3.0', gone: true, size: 84911876, crc: 0x77b22d66, tested: true,
       sites: [{ off: 0x40b1810, old: [0x80, 0x5a, 0x47, 0xb9] }, { off: 0x4397a9c, old: [0x00, 0x80, 0x40, 0xb9] }] },
     // First upload of 0.3.0; the release zip was replaced a few hours later with a rebuilt engine.
     // Hidden from the versions table, but still recognised and restorable.
