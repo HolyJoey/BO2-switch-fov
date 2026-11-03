@@ -80,7 +80,7 @@ input.fov-num::-webkit-inner-spin-button,input.fov-num::-webkit-outer-spin-butto
 input.fov-num:focus{outline:2px solid var(--accent);outline-offset:1px}
 pre{background:var(--code-bg);color:var(--code-text);border-radius:10px;padding:14px;overflow-x:auto;margin:0;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 #cfgPath{word-break:break-all}
-code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em;background:var(--surface-2);padding:1px 5px;border-radius:5px}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em;background:var(--surface-2);padding:1px 5px;border-radius:5px;overflow-wrap:anywhere}
 ol,ul{margin:0;padding-left:1.3em}
 ol li,ul li{margin:6px 0}
 .where td:first-child{white-space:nowrap}
@@ -88,7 +88,9 @@ ol li,ul li{margin:6px 0}
 .case h3{font-size:1rem;margin:0 0 6px;line-height:1.35}
 .case p{margin:0 0 10px}
 .case p:last-child{margin-bottom:0}
-.case .where{margin-top:4px}
+.case .where{margin-top:4px;table-layout:auto}
+.where td:last-child{overflow-wrap:anywhere}
+.where td:last-child code{overflow-wrap:anywhere}
 h3.sub{font-size:1rem;margin:20px 0 0}
 .zipbox{margin-top:14px;padding:2px 16px 16px;border:1px solid var(--accent);border-radius:var(--radius);background:var(--surface-2)}
 .zipbox p{margin:8px 0 0}
@@ -128,10 +130,12 @@ footer a,.card a:not(.btn){color:var(--accent)}
   .tabs button{flex:1}
   pre{font-size:13px}
 }
+@media (max-width:440px){
+  .badge{white-space:normal}
+}
 @media (max-width:360px){
   table{font-size:.85rem}
   th,td{padding:8px 3px}
-  .badge{white-space:normal}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -185,8 +189,8 @@ footer a,.card a:not(.btn){color:var(--accent)}
       <table class="where">
         <thead><tr><th>File</th><th>Folder on the SD card</th></tr></thead>
         <tbody>
-          <tr><td><code>t6zm.nro</code><br><code>t6mp.nro</code></td><td><code>/switch/t6game/</code></td></tr>
-          <tr><td><code>patch_zm.ff</code><br><code>patch_mp.ff</code></td><td><code>/switch/t6game/zone/all/</code></td></tr>
+          <tr><td><code>t6zm.nro</code><br><code>t6mp.nro</code></td><td><code>/switch/<wbr>t6game/</code></td></tr>
+          <tr><td><code>patch_zm.ff</code><br><code>patch_mp.ff</code></td><td><code>/switch/<wbr>t6game/<wbr>zone/<wbr>all/</code></td></tr>
         </tbody>
       </table>
     </div>
