@@ -282,8 +282,8 @@
   /** Readable form of a 4-byte patch-site instruction. */
   function describeInsn(bytes) {
     const w = (bytes[0] | bytes[1] << 8 | bytes[2] << 16 | bytes[3] << 24) >>> 0;
-    if (w === NEW_WORD) return 'movz w0, #0x4320, lsl #16 (max 160)';
-    if (isLdrW0(w)) return `ldr w0, [x${(w >>> 5) & 0x1f}, #${hex(((w >>> 10) & 0xfff) * 4)}] (loads the old max)`;
+    if (w === NEW_WORD) return 'movz w0, #0x4320, lsl #16 (sets the max to 160)';
+    if (isLdrW0(w)) return `ldr w0, [x${(w >>> 5) & 0x1f}, #${hex(((w >>> 10) & 0xfff) * 4)}] (loads the old max, 90)`;
     return 'unknown instruction';
   }
 

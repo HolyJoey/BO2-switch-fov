@@ -65,6 +65,9 @@ h1 span{color:var(--accent)}
 .kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;margin:6px 0 0}
 .kv dt{color:var(--muted)}
 .kv dd{margin:0;overflow-wrap:anywhere}
+.change{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 10px;margin-top:4px}
+.change .lbl{color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.03em;padding-top:2px}
+.kv code{white-space:nowrap}
 .copybox{margin-top:10px;white-space:pre-wrap;word-break:break-all;font-size:12px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:var(--accent-ink);border:0;border-radius:10px;padding:12px 18px;font:inherit;font-weight:650;cursor:pointer;text-decoration:none;margin-top:14px}
 .btn[hidden]{display:none}
@@ -105,6 +108,8 @@ footer a,.card a:not(.btn){color:var(--accent)}
   .drop{padding:32px 16px}
 }
 @media (max-width:520px){
+  .kv{grid-template-columns:minmax(0,1fr);gap:0}
+  .kv dt{margin-top:8px;font-size:.8rem}
   h1{font-size:1.4rem}
   .card{padding:16px}
   .row{flex-direction:column;align-items:stretch}
@@ -113,6 +118,11 @@ footer a,.card a:not(.btn){color:var(--accent)}
   .btn{width:100%}
   .tabs button{flex:1}
   pre{font-size:13px}
+}
+@media (max-width:360px){
+  table{font-size:.85rem}
+  th,td{padding:8px 3px}
+  .badge{white-space:normal}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -276,14 +286,18 @@ footer a,.card a:not(.btn){color:var(--accent)}
       ['Patch sites', how],
     ];
     if (r.engine !== null) rows.push(['Engine (ELF) starts at', P.hex(r.engine)]);
+    rows.push(['What changes', 'Maximum FOV of <code>cg_fov</code> and <code>cg_fov_default</code>: <b>90 → 160</b>']);
+    const insn = b => `<code>${bytesHex(b)}</code><br><span class="muted">${P.describeInsn(b)}</span>`;
     r.sites.forEach((s, i) => {
       let orig = null;
       if (r.known) orig = r.known.sites[i].old;
       else if (s.state === 'stock') orig = s.bytes;
-      const was = orig ? `<code>${bytesHex(orig)}</code><br><span class="muted">${P.describeInsn(orig)}</span>` : '<span class="muted">unknown (the file was already patched)</span>';
-      rows.push([`<code>${s.setting}</code> max`, `at <code>${P.hex(s.off)}</code><br>${was}`]);
+      const before = orig ? insn(orig) : '<span class="muted">unknown (the file was already patched)</span>';
+      rows.push([`<code>${s.setting}</code> max`,
+        `at offset <code>${P.hex(s.off)}</code>` +
+        `<span class="change"><span class="lbl">Before</span><span>${before}</span>` +
+        `<span class="lbl">After</span><span>${insn(P.NEW)}</span></span>`]);
     });
-    rows.push(['Patched to', `<code>${bytesHex(P.NEW)}</code><br><span class="muted">${P.describeInsn(P.NEW)}</span>`]);
     const d = document.createElement('details');
     d.className = 'tech';
     d.innerHTML = '<summary>Technical details</summary><dl class="kv">' +
