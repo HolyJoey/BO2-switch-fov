@@ -62,10 +62,7 @@ h1 span{color:var(--accent)}
 .actions .btn,.actions .btn.secondary{margin-top:12px}
 .tech{margin-top:10px;font-size:.88rem}
 .tech summary{cursor:pointer;color:var(--muted);padding:4px 0}
-.tech-scroll{overflow-x:auto;margin-top:6px}
-.tech table{font-size:.85rem}
-.tech td,.tech th{white-space:nowrap}
-.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 14px;margin:6px 0 0}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;margin:6px 0 0}
 .kv dt{color:var(--muted)}
 .kv dd{margin:0;overflow-wrap:anywhere}
 .copybox{margin-top:10px;white-space:pre-wrap;word-break:break-all;font-size:12px}
@@ -279,21 +276,18 @@ footer a,.card a:not(.btn){color:var(--accent)}
       ['Patch sites', how],
     ];
     if (r.engine !== null) rows.push(['Engine (ELF) starts at', P.hex(r.engine)]);
-    const info = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
-    const sites = r.sites.map((s, i) => {
+    r.sites.forEach((s, i) => {
       let orig = null;
       if (r.known) orig = r.known.sites[i].old;
       else if (s.state === 'stock') orig = s.bytes;
-      const was = orig ? `<code>${bytesHex(orig)}</code><br><span class="muted">${P.describeInsn(orig)}</span>` : '<span class="muted">unknown (file was already patched)</span>';
-      return `<tr><td><code>${s.setting}</code> max</td><td><code>${P.hex(s.off)}</code></td><td>${was}</td>` +
-        `<td><code>${bytesHex(P.NEW)}</code><br><span class="muted">${P.describeInsn(P.NEW)}</span></td></tr>`;
-    }).join('');
+      const was = orig ? `<code>${bytesHex(orig)}</code><br><span class="muted">${P.describeInsn(orig)}</span>` : '<span class="muted">unknown (the file was already patched)</span>';
+      rows.push([`<code>${s.setting}</code> max`, `at <code>${P.hex(s.off)}</code><br>${was}`]);
+    });
+    rows.push(['Patched to', `<code>${bytesHex(P.NEW)}</code><br><span class="muted">${P.describeInsn(P.NEW)}</span>`]);
     const d = document.createElement('details');
     d.className = 'tech';
-    d.innerHTML = '<summary>Technical details</summary>' +
-      `<dl class="kv">${info}</dl>` +
-      '<div class="tech-scroll"><table><thead><tr><th>Setting</th><th>File offset</th><th>Original</th><th>Patched</th></tr></thead>' +
-      `<tbody>${sites}</tbody></table></div>`;
+    d.innerHTML = '<summary>Technical details</summary><dl class="kv">' +
+      rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('') + '</dl>';
     return d;
   }
 
