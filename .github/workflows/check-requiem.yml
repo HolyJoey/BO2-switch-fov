@@ -1,0 +1,31 @@
+# Checks every hour whether the latest BO2 Requiem NX release has a t6zm.nro / t6mp.nro build that
+# patcher.js doesn't list yet, and opens one issue per new build (see .github/scripts/check-release.cjs).
+name: Check Requiem releases
+
+on:
+  schedule:
+    - cron: '23 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: check-requiem
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read  # check out patcher.js
+      issues: write   # open an issue for a new build
+      actions: write  # delete earlier runs that found nothing
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check the latest Requiem release
+        run: node .github/scripts/check-release.cjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

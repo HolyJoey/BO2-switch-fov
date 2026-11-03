@@ -31,20 +31,21 @@
 
   // Builds whose offsets have been checked by hand. Auto-detection handles every other build;
   // this list adds the release tag, the "tested" status and the original bytes for restoring.
+  // size + crc (CRC-32 of the stock file) let the release check recognise a build from the zip.
   const KNOWN = [
-    { kind: 'zm', build: '0.3.0', size: 52277821, tested: true,
+    { kind: 'zm', build: '0.3.0', size: 52277821, crc: 0xb076df13, tested: true,
       sites: [{ off: 0x219d619, old: [0x80, 0xda, 0x44, 0xb9] }, { off: 0x24886e5, old: [0x00, 0x00, 0x4e, 0xb9] }] },
-    { kind: 'mp', build: '0.3.0', size: 84911876, tested: true,
+    { kind: 'mp', build: '0.3.0', size: 84911876, crc: 0x77b22d66, tested: true,
       sites: [{ off: 0x40b1810, old: [0x80, 0x5a, 0x47, 0xb9] }, { off: 0x4397a9c, old: [0x00, 0x80, 0x40, 0xb9] }] },
     // First upload of 0.3.0; the release zip was replaced a few hours later with a rebuilt engine.
     // Hidden from the versions table, but still recognised and restorable.
-    { kind: 'zm', build: '0.3.0', note: 'first upload', hidden: true, size: 52273725, tested: false,
+    { kind: 'zm', build: '0.3.0', note: 'first upload', hidden: true, size: 52273725, crc: 0x6d9cf47c, tested: false,
       sites: [{ off: 0x219ca39, old: [0x80, 0x7a, 0x43, 0xb9] }, { off: 0x2487875, old: [0x00, 0xc0, 0x4d, 0xb9] }] },
-    { kind: 'mp', build: '0.3.0', note: 'first upload', hidden: true, size: 84908884, tested: false,
+    { kind: 'mp', build: '0.3.0', note: 'first upload', hidden: true, size: 84908884, crc: 0xc0ea874e, tested: false,
       sites: [{ off: 0x40b1810, old: [0x80, 0xba, 0x4a, 0xb9] }, { off: 0x439780c, old: [0x00, 0x00, 0x45, 0xb9] }] },
-    { kind: 'zm', build: '0.2.5', size: 51335533, tested: true,
+    { kind: 'zm', build: '0.2.5', size: 51335533, crc: 0x35bbcc90, tested: true,
       sites: [{ off: 0x20e71b9, old: [0x80, 0x5a, 0x46, 0xb9] }, { off: 0x23c9405, old: [0x00, 0xa0, 0x40, 0xb9] }] },
-    { kind: 'mp', build: '0.2.5', size: 83981876, tested: true,
+    { kind: 'mp', build: '0.2.5', size: 83981876, crc: 0x6c950a47, tested: true,
       sites: [{ off: 0x3ffdb50, old: [0x80, 0x9a, 0x4c, 0xb9] }, { off: 0x42dfd7c, old: [0x00, 0xe0, 0x46, 0xb9] }] },
   ];
 
@@ -57,7 +58,7 @@
   const VERSION_RE = /\0(\d{1,3}\.\d{1,3}\.\d{1,3})\0{1,32}[A-Z][a-z]{2} [ \d]\d \d{4} \d\d:\d\d:\d\d\0/;
 
   class PatchError extends Error {
-    constructor(code, detail) { super(detail || code); this.code = code; }
+    constructor(code, detail, info) { super(detail || code); this.code = code; this.info = info || {}; }
   }
 
   async function read(blob, off, len) {
@@ -99,7 +100,7 @@
       }
       if (onProgress) onProgress(Math.min(1, (pos + CHUNK) / blob.size) * 0.7);
     }
-    if (elfs.length !== 1) throw new PatchError('noengine', `expected one embedded 32-bit AArch64 ELF, found ${elfs.length}`);
+    if (elfs.length !== 1) throw new PatchError('noengine', `expected one embedded 32-bit AArch64 ELF, found ${elfs.length}`, { version });
     return { base: elfs[0], version };
   }
 
@@ -175,6 +176,15 @@
 
   async function autoDetect(blob, onProgress) {
     const { base, version } = await scanFile(blob, onProgress);
+    try {
+      return await findInEngine(blob, base, version, onProgress);
+    } catch (err) {
+      if (err instanceof PatchError) Object.assign(err.info, { version, engine: base });
+      throw err;
+    }
+  }
+
+  async function findInEngine(blob, base, version, onProgress) {
     const { text, rodata } = await readSections(blob, base);
     const ro = latin1(await read(blob, base + rodata.off, rodata.size));
     const strAddr = s => {
@@ -197,7 +207,7 @@
       return { setting, off, bytes: Array.from(code.subarray(found[0], found[0] + 4)) };
     });
     if (onProgress) onProgress(1);
-    return { kind: kinds[0], version, sites, known: null };
+    return { kind: kinds[0], version, sites, known: null, method: 'auto', engine: base };
   }
 
   // Known build: only the bytes at the known offsets are read, so this is instant.
@@ -207,7 +217,7 @@
       const bytes = await Promise.all(k.sites.map(s => read(blob, s.off, 4)));
       const ok = bytes.every((b, i) => sameBytes(Array.from(b), k.sites[i].old) || sameBytes(Array.from(b), NEW));
       if (!ok) continue;
-      return { kind: KINDS[k.kind], version: k.build, known: k,
+      return { kind: KINDS[k.kind], version: k.build, known: k, method: 'known', engine: null,
         sites: k.sites.map((s, i) => ({ setting: SETTINGS[i], off: s.off, bytes: Array.from(bytes[i]) })) };
     }
     return null;
@@ -267,7 +277,17 @@
     return got.every((b, i) => sameBytes(Array.from(b), expected(i)));
   }
 
-  const api = { NEW, KINDS, KNOWN, SETTINGS, PatchError, analyze, patch, restore, verify };
+  const hex = (n, w) => '0x' + n.toString(16).padStart(w || 0, '0');
+
+  /** Readable form of a 4-byte patch-site instruction. */
+  function describeInsn(bytes) {
+    const w = (bytes[0] | bytes[1] << 8 | bytes[2] << 16 | bytes[3] << 24) >>> 0;
+    if (w === NEW_WORD) return 'movz w0, #0x4320, lsl #16 (max 160)';
+    if (isLdrW0(w)) return `ldr w0, [x${(w >>> 5) & 0x1f}, #${hex(((w >>> 10) & 0xfff) * 4)}] (loads the old max)`;
+    return 'unknown instruction';
+  }
+
+  const api = { NEW, KINDS, KNOWN, SETTINGS, PatchError, analyze, patch, restore, verify, describeInsn, hex };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.FovPatcher = api;
 })(typeof globalThis === 'undefined' ? this : globalThis);

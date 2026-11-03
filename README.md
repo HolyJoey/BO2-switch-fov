@@ -14,12 +14,14 @@ Works in any modern browser, on desktop and on phones.
 ## How to use
 
 1. Download Requiem from the [official releases](https://github.com/HDErick/BO2-Requiem-NX/releases)
-   and set it up as usual.
+   and set it up as usual. **Updating?** Copy the whole new release to the SD card first,
+   including `t6game.nro` (the launcher), otherwise the game says it's out of date.
 2. Copy `t6zm.nro` (Zombies) or `t6mp.nro` (Multiplayer) from `/switch/t6game/` on your SD
    card to your PC or phone. **Keep a backup of the original.**
 3. Open the page and drop the file in (or tap to choose it on a phone). You can add both files
    at once. It detects Zombies or Multiplayer from the file's contents, patches it and gives you
-   the patched file to download.
+   the patched file to download. Open *Technical details* under a result to see exactly which
+   bytes change.
 4. Put the patched file back in `/switch/t6game/` with the same name.
 5. Pick your FOV on the page (use the slider or type a value from 65 to 160) and copy the lines
    into `/switch/t6game/players/config_zm.cfg` or `config_mp.cfg`. For 120 they look like this:
@@ -49,8 +51,20 @@ Those builds are marked *Auto-detected* until they've been tested on a Switch. I
 isn't found, the file is refused and nothing gets changed.
 
 Auto-detection gives the same offsets as the hand-checked ones for every release so far
-(0.0.1, 0.2.2 to 0.2.5 and both uploads of 0.3.0). The page can only restore an original for the builds in the
-table (and the first upload of 0.3.0, which was replaced under the same tag), because for other builds it doesn't know the original bytes once a file is patched.
+(0.0.1, 0.2.2 to 0.2.5 and both uploads of 0.3.0). The page can only restore an original for
+the builds in the table (and the first upload of 0.3.0, which was replaced under the same tag),
+because for other builds it doesn't know the original bytes once a file is patched.
+
+Is your file refused? Use *Copy details* or *Report on GitHub* on the page, which opens an
+issue with the file size, the Requiem version found in it and the reason.
+
+### New releases
+
+A [GitHub Action](.github/workflows/check-requiem.yml) checks the latest Requiem release every
+hour. It reads only the table of contents of the release zip and recognises known builds by
+size and CRC-32. For a new build it runs the same detection code as the page on the two files
+and opens one issue saying whether the page already handles it, with the offsets ready to add.
+Runs that found nothing are cleaned up automatically.
 
 ## What the patch changes
 
