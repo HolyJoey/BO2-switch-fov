@@ -35,8 +35,12 @@ Works in any modern browser, on desktop and on phones.
    | `t6zm.nro`, `t6mp.nro` | `/switch/t6game/` |
    | `patch_zm.ff`, `patch_mp.ff` | `/switch/t6game/zone/all/` |
 
-5. Copy the config lines from the page into `/switch/t6game/players/config_zm.cfg` or
-   `config_mp.cfg`. For 120 they look like this:
+5. Set your FOV:
+   - **Patched the menu files too?** Nothing else to do. Set your FOV in the game under Options;
+     the game saves it in its config by itself.
+   - **Only patched the `.nro`?** The slider in the game still stops at 90, so copy the config
+     lines from the page into `/switch/t6game/players/config_zm.cfg` or `config_mp.cfg`, and
+     don't touch the slider in the game afterwards. For 120 the lines look like this:
 
    ```
    seta cg_fov "120"

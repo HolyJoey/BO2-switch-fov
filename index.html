@@ -84,6 +84,10 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:
 ol,ul{margin:0;padding-left:1.3em}
 ol li,ul li{margin:6px 0}
 .where td:first-child{white-space:nowrap}
+.case{border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:14px}
+.case h3{font-size:1rem;margin:0 0 6px;line-height:1.35}
+.case p{margin:0 0 10px}
+.case p:last-child{margin-bottom:0}
 .muted{color:var(--muted)}
 .tabs{display:flex;gap:6px;margin-bottom:10px}
 .tabs button{background:var(--surface-2);color:var(--muted);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font:inherit;font-size:.9rem;cursor:pointer}
@@ -140,7 +144,7 @@ footer a,.card a:not(.btn){color:var(--accent)}
     <p style="margin-top:0">There are two kinds of files, both on your SD card.</p>
     <ul style="margin-bottom:14px">
       <li><b>The game</b> (needed): <code>t6zm.nro</code> (Zombies) and/or <code>t6mp.nro</code> (Multiplayer), from <code>/switch/t6game/</code>. This removes the 90 limit, so the game accepts an FOV up to 160.</li>
-      <li><b>The menu</b> (recommended): <code>patch_zm.ff</code> and/or <code>patch_mp.ff</code>, from <code>/switch/t6game/zone/all/</code>. This makes the FOV slider in the game's options go up to the FOV you pick in step 2. Without it the slider stops at 90, so changing your FOV in the game sets it back to 90 or lower.</li>
+      <li><b>The menu</b> (recommended): <code>patch_zm.ff</code> and/or <code>patch_mp.ff</code>, from <code>/switch/t6game/zone/all/</code>. This makes the FOV slider in the game's options go up to the FOV you pick in step 2. Without it the slider stops at 90, and you have to set your FOV in a config file instead (step 2).</li>
     </ul>
     <label class="drop" id="drop">
       <input type="file" id="file" multiple>
@@ -152,19 +156,26 @@ footer a,.card a:not(.btn){color:var(--accent)}
   </section>
 
   <section class="card">
-    <h2><span class="step">2</span><span>Set your FOV in the config</span></h2>
-    <p class="muted" style="margin-top:0">The patch only removes the 90 limit. You set your starting FOV with these lines. Replace any existing <code>cg_fov</code> lines, or add them. With the menu file patched you can also change it later in the game's options.</p>
-    <p class="muted">The FOV you pick here is also the highest value of the FOV slider in the menu files (<code>patch_zm.ff</code> / <code>patch_mp.ff</code>) from step 1. Change it, and their download is updated.</p>
+    <h2><span class="step">2</span><span>Pick your FOV</span></h2>
+    <p class="muted" style="margin-top:0">This is the highest FOV you want to use. For the menu files from step 1 it sets how far the slider in the game goes: change it, and their download is updated.</p>
     <div class="row">
       <div class="fov"><label for="fovNum">FOV</label><input type="range" id="fov" min="65" max="160" step="1" value="120" aria-label="FOV slider"><input type="number" class="fov-num" id="fovNum" min="65" max="160" step="1" value="120" inputmode="numeric" aria-label="FOV value (65 to 160)"></div>
-      <button type="button" class="btn secondary" id="copy">Copy</button>
     </div>
-    <div class="tabs" role="tablist">
-      <button type="button" role="tab" data-mode="zm" aria-selected="true">Zombies</button>
-      <button type="button" role="tab" data-mode="mp" aria-selected="false">Multiplayer</button>
+    <div class="case">
+      <h3>Patched the menu files (<code>.ff</code>) too? Nothing else to do.</h3>
+      <p>Set your FOV in the game, under Options. The slider goes up to <b id="caseMax">120</b>. The game saves your choice in its config by itself, so you don't need to edit any file.</p>
     </div>
-    <p class="muted" style="margin:0 0 8px">File: <code id="cfgPath">/switch/t6game/players/config_zm.cfg</code></p>
-    <pre id="cfg"></pre>
+    <div class="case">
+      <h3>Only patched the <code>.nro</code>? Edit the config.</h3>
+      <p>The slider in the game still stops at 90, so set your FOV with these lines instead. Replace any existing <code>cg_fov</code> lines, or add them. Don't touch the FOV slider in the game afterwards: that sets it back to 90 or lower.</p>
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" data-mode="zm" aria-selected="true">Zombies</button>
+        <button type="button" role="tab" data-mode="mp" aria-selected="false">Multiplayer</button>
+      </div>
+      <p class="muted" style="margin:0 0 8px">File: <code id="cfgPath">/switch/t6game/players/config_zm.cfg</code></p>
+      <pre id="cfg"></pre>
+      <button type="button" class="btn secondary" id="copy" style="margin-top:10px">Copy</button>
+    </div>
   </section>
 
   <section class="card">
@@ -180,8 +191,7 @@ footer a,.card a:not(.btn){color:var(--accent)}
           </tbody>
         </table>
       </li>
-      <li>Edit the config as shown in step 2.</li>
-      <li>Start the game. The FOV slider is under Options in the game's menu.</li>
+      <li>Start the game. Patched the menu files? Set your FOV under Options. Only patched the <code>.nro</code>? Edit the config first, as shown in step 2.</li>
       <li>Want to undo it? Put your original files back. Lost them? Drop the patched file in here: for a .nro you get the original back, for a .ff you get a copy with the normal slider (up to 90).</li>
     </ol>
   </section>
@@ -520,6 +530,7 @@ footer a,.card a:not(.btn){color:var(--accent)}
     const v = fov.value;
     $('cfg').textContent = `seta cg_fov "${v}"\nseta cg_fov_default "${v}"` + (mode === 'zm' ? `\nseta cg_fovScale "1"` : '');
     $('cfgPath').textContent = '/switch/t6game/players/' + P.KINDS[mode].cfg;
+    $('caseMax').textContent = String(Math.max(F.OLD_MAX, Number(v)));
   }
   function setMode(m) {
     mode = m;
