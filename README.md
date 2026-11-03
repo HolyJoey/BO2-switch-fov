@@ -18,24 +18,26 @@ Works in any modern browser, on desktop and on phones.
 1. Download Requiem from the [official releases](https://github.com/HDErick/BO2-Requiem-NX/releases)
    and set it up as usual. **Updating?** Copy the whole new release to the SD card first,
    including `t6game.nro` (the launcher), otherwise the game says it's out of date.
-2. Copy these files from your SD card to your PC or phone. **Keep a backup of the originals.**
+2. Copy these files from your SD card to your PC or phone. Keep a backup of the originals.
    - `t6zm.nro` (Zombies) and/or `t6mp.nro` (Multiplayer) from `/switch/t6game/` (needed).
    - `patch_zm.ff` and/or `patch_mp.ff` from `/switch/t6game/zone/all/` (recommended: without
      them the FOV slider in the game's menu stops at 90).
-3. Open the page, pick your FOV (use the slider or type a value from 65 to 160) and drop the
-   files in (or tap to choose them on a phone). You can add up to 4 files at once. The page
-   recognises each file from its contents, patches it and gives you the patched file to
-   download. The FOV you pick is also the highest value of the slider in the menu files; change
-   it and their download is updated. Open *Technical details* under a result to see exactly
-   what changes.
-4. Put each patched file back where it came from, with the same name, replacing the one there:
+3. Open the page and pick your FOV first (use the slider or type a value from 65 to 160). This
+   is the highest value the FOV slider in the game will go to.
+4. Drop the files in (or tap to choose them on a phone). You can add up to 4 files at once. The
+   page recognises each file from its contents and patches it. Change the FOV afterwards and the
+   menu files are updated. Open *Technical details* under a result to see exactly what changes.
+5. Download **everything as one zip** and unzip it onto the root of your SD card (the folder
+   with the `switch` folder in it), replacing the existing files. The zip has the SD card's
+   folder layout, so every file lands in the right place. Or download the files one by one and
+   put each back where it came from, with the same name, replacing the one there:
 
    | File | Folder on the SD card |
    |---|---|
    | `t6zm.nro`, `t6mp.nro` | `/switch/t6game/` |
    | `patch_zm.ff`, `patch_mp.ff` | `/switch/t6game/zone/all/` |
 
-5. Set your FOV:
+6. Set your FOV:
    - **Patched the menu files too?** Nothing else to do. Set your FOV in the game under Options;
      the game saves it in its config by itself.
    - **Only patched the `.nro`?** The slider in the game still stops at 90, so copy the config
@@ -144,7 +146,8 @@ loads without a signature check. Tested on a Switch with Requiem 0.3.1, in Zombi
 Multiplayer.
 
 The detection and patching code is in [`patcher.js`](patcher.js) (the `.nro`) and
-[`fastfile.js`](fastfile.js) (the menu), the page is [`index.html`](index.html).
+[`fastfile.js`](fastfile.js) (the menu), the zip download in [`zip.js`](zip.js), and the page is
+[`index.html`](index.html).
 
 ## Credits
 
