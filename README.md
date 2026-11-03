@@ -38,8 +38,6 @@ and it gives you the original back (for the builds listed below).
 |---|---|---|---|
 | `t6zm.nro` (Zombies) | [0.3.0](https://github.com/HDErick/BO2-Requiem-NX/releases/tag/0.3.0) | 52,277,821 | Tested on Switch |
 | `t6mp.nro` (Multiplayer) | [0.3.0](https://github.com/HDErick/BO2-Requiem-NX/releases/tag/0.3.0) | 84,911,876 | Tested on Switch |
-| `t6zm.nro` (Zombies) | 0.3.0 (first upload) | 52,273,725 | Supported, not tested in game yet |
-| `t6mp.nro` (Multiplayer) | 0.3.0 (first upload) | 84,908,884 | Supported, not tested in game yet |
 | `t6zm.nro` (Zombies) | [0.2.5](https://github.com/HDErick/BO2-Requiem-NX/releases/tag/0.2.5) | 51,335,533 | Tested on Switch |
 | `t6mp.nro` (Multiplayer) | [0.2.5](https://github.com/HDErick/BO2-Requiem-NX/releases/tag/0.2.5) | 83,981,876 | Tested on Switch |
 
@@ -52,7 +50,7 @@ isn't found, the file is refused and nothing gets changed.
 
 Auto-detection gives the same offsets as the hand-checked ones for every release so far
 (0.0.1, 0.2.2 to 0.2.5 and both uploads of 0.3.0). The page can only restore an original for the builds in the
-table, because for other builds it doesn't know the original bytes once a file is patched.
+table (and the first upload of 0.3.0, which was replaced under the same tag), because for other builds it doesn't know the original bytes once a file is patched.
 
 ## What the patch changes
 

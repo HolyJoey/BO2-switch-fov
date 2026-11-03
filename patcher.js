@@ -37,9 +37,10 @@
     { kind: 'mp', build: '0.3.0', size: 84911876, tested: true,
       sites: [{ off: 0x40b1810, old: [0x80, 0x5a, 0x47, 0xb9] }, { off: 0x4397a9c, old: [0x00, 0x80, 0x40, 0xb9] }] },
     // First upload of 0.3.0; the release zip was replaced a few hours later with a rebuilt engine.
-    { kind: 'zm', build: '0.3.0', note: 'first upload', size: 52273725, tested: false,
+    // Hidden from the versions table, but still recognised and restorable.
+    { kind: 'zm', build: '0.3.0', note: 'first upload', hidden: true, size: 52273725, tested: false,
       sites: [{ off: 0x219ca39, old: [0x80, 0x7a, 0x43, 0xb9] }, { off: 0x2487875, old: [0x00, 0xc0, 0x4d, 0xb9] }] },
-    { kind: 'mp', build: '0.3.0', note: 'first upload', size: 84908884, tested: false,
+    { kind: 'mp', build: '0.3.0', note: 'first upload', hidden: true, size: 84908884, tested: false,
       sites: [{ off: 0x40b1810, old: [0x80, 0xba, 0x4a, 0xb9] }, { off: 0x439780c, old: [0x00, 0x00, 0x45, 0xb9] }] },
     { kind: 'zm', build: '0.2.5', size: 51335533, tested: true,
       sites: [{ off: 0x20e71b9, old: [0x80, 0x5a, 0x46, 0xb9] }, { off: 0x23c9405, old: [0x00, 0xa0, 0x40, 0xb9] }] },

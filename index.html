@@ -195,7 +195,7 @@ footer a,.card a:not(.btn){color:var(--accent)}
   let mode = 'zm', urls = [];
 
   // Supported versions table: the hand-checked builds, plus a row for everything newer.
-  $('versions').innerHTML = P.KNOWN.map(k => {
+  $('versions').innerHTML = P.KNOWN.filter(k => !k.hidden).map(k => {
     const kind = P.KINDS[k.kind], status = k.tested ? 'tested' : 'verified';
     return `<tr><td><code>${kind.file}</code><br><span class="muted">${kind.name}</span></td>` +
       `<td><a href="${RELEASES}/tag/${k.build}" rel="noopener">${k.build}</a>${k.note ? ' <span class="muted small">(' + k.note + ')</span>' : ''}<br><span class="muted">${bytes(k.size)} bytes</span></td>` +
