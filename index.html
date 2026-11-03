@@ -269,12 +269,12 @@ footer a,.card a:not(.btn){color:var(--accent)}
       if (r.patched < r.sites.length) {
         const out = P.patch(file, r);
         if (!(await P.verify(out, r, () => P.NEW))) throw new Error('patched file failed verification');
-        addDownload(ui.actions, out, 'Download patched file', r.kind.file, false);
+        addDownload(ui.actions, out, 'Download patched ' + r.kind.file, r.kind.file, false);
       }
       if (r.canRestore) {
         const orig = P.restore(file, r);
         if (!(await P.verify(orig, r, i => r.known.sites[i].old))) throw new Error('restored file failed verification');
-        addDownload(ui.actions, orig, 'Download original file', r.kind.file, r.patched < r.sites.length);
+        addDownload(ui.actions, orig, 'Download original ' + r.kind.file, r.kind.file, r.patched < r.sites.length);
       }
       ui.set(r.status === 'auto' && r.patched === 0 ? 'warn' : 'ok', title(r) + body(r) + hint);
       return r;
