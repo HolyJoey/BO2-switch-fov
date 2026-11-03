@@ -173,6 +173,10 @@ footer a,.card a:not(.btn){color:var(--accent)}
 (() => {
   const NEW = [0x00, 0x64, 0xa8, 0x52]; // movz w0,#0x4320,lsl#16  →  max = 160.0f
   const PROFILES = [
+    { id: 'zm', name: 'Zombies', file: 't6zm.nro', build: '0.3.0', size: 52273725, cfg: 'config_zm.cfg',
+      sites: [ { off: 0x219ca39, old: [0x80,0x7a,0x43,0xb9] }, { off: 0x2487875, old: [0x00,0xc0,0x4d,0xb9] } ] },
+    { id: 'mp', name: 'Multiplayer', file: 't6mp.nro', build: '0.3.0', size: 84908884, cfg: 'config_mp.cfg',
+      sites: [ { off: 0x40b1810, old: [0x80,0xba,0x4a,0xb9] }, { off: 0x439780c, old: [0x00,0x00,0x45,0xb9] } ] },
     { id: 'zm', name: 'Zombies', file: 't6zm.nro', build: '0.2.5', size: 51335533, cfg: 'config_zm.cfg',
       sites: [ { off: 0x20e71b9, old: [0x80,0x5a,0x46,0xb9] }, { off: 0x23c9405, old: [0x00,0xa0,0x40,0xb9] } ] },
     { id: 'mp', name: 'Multiplayer', file: 't6mp.nro', build: '0.2.5', size: 83981876, cfg: 'config_mp.cfg',

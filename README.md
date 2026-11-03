@@ -36,6 +36,8 @@ To undo it, put your original file back.
 
 | File | Requiem release | Size (bytes) | Status |
 |---|---|---|---|
+| `t6zm.nro` (Zombies) | [0.3.0](https://github.com/HDErick/BO2-Requiem-NX/releases/tag/0.3.0) | 52,273,725 | Supported |
+| `t6mp.nro` (Multiplayer) | [0.3.0](https://github.com/HDErick/BO2-Requiem-NX/releases/tag/0.3.0) | 84,908,884 | Supported |
 | `t6zm.nro` (Zombies) | [0.2.5](https://github.com/HDErick/BO2-Requiem-NX/releases/tag/0.2.5) | 51,335,533 | Tested on Switch |
 | `t6mp.nro` (Multiplayer) | [0.2.5](https://github.com/HDErick/BO2-Requiem-NX/releases/tag/0.2.5) | 83,981,876 | Tested on Switch |
 
@@ -53,12 +55,16 @@ The 160 limit is a deliberate choice, not an engine limit. It leaves room above 
 staying well clear of 180, where the view projection breaks down. The lower limit of 65 comes
 from the game itself.
 
-| File | Setting | File offset | Original bytes | Patched bytes |
-|---|---|---|---|---|
-| `t6zm.nro` | `cg_fov` max | `0x20E71B9` | `80 5A 46 B9` | `00 64 A8 52` |
-| `t6zm.nro` | `cg_fov_default` max | `0x23C9405` | `00 A0 40 B9` | `00 64 A8 52` |
-| `t6mp.nro` | `cg_fov` max | `0x3FFDB50` | `80 9A 4C B9` | `00 64 A8 52` |
-| `t6mp.nro` | `cg_fov_default` max | `0x42DFD7C` | `00 E0 46 B9` | `00 64 A8 52` |
+| File | Release | Setting | File offset | Original bytes | Patched bytes |
+|---|---|---|---|---|---|
+| `t6zm.nro` | 0.3.0 | `cg_fov` max | `0x219CA39` | `80 7A 43 B9` | `00 64 A8 52` |
+| `t6zm.nro` | 0.3.0 | `cg_fov_default` max | `0x2487875` | `00 C0 4D B9` | `00 64 A8 52` |
+| `t6mp.nro` | 0.3.0 | `cg_fov` max | `0x40B1810` | `80 BA 4A B9` | `00 64 A8 52` |
+| `t6mp.nro` | 0.3.0 | `cg_fov_default` max | `0x439780C` | `00 00 45 B9` | `00 64 A8 52` |
+| `t6zm.nro` | 0.2.5 | `cg_fov` max | `0x20E71B9` | `80 5A 46 B9` | `00 64 A8 52` |
+| `t6zm.nro` | 0.2.5 | `cg_fov_default` max | `0x23C9405` | `00 A0 40 B9` | `00 64 A8 52` |
+| `t6mp.nro` | 0.2.5 | `cg_fov` max | `0x3FFDB50` | `80 9A 4C B9` | `00 64 A8 52` |
+| `t6mp.nro` | 0.2.5 | `cg_fov_default` max | `0x42DFD7C` | `00 E0 46 B9` | `00 64 A8 52` |
 
 The page checks the file size and the original bytes at every offset before it changes
 anything, so a wrong or updated file is never patched by accident. It only reads those few
