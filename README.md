@@ -36,8 +36,8 @@ and it gives you the original back (for the builds listed below).
 
 | File | Requiem release | Size (bytes) | Status |
 |---|---|---|---|
-| `t6zm.nro` (Zombies) | [0.3.0](https://github.com/HDErick/BO2-Requiem-NX/releases/tag/0.3.0) | 52,277,821 | Supported, not tested in game yet |
-| `t6mp.nro` (Multiplayer) | [0.3.0](https://github.com/HDErick/BO2-Requiem-NX/releases/tag/0.3.0) | 84,911,876 | Supported, not tested in game yet |
+| `t6zm.nro` (Zombies) | [0.3.0](https://github.com/HDErick/BO2-Requiem-NX/releases/tag/0.3.0) | 52,277,821 | Tested on Switch |
+| `t6mp.nro` (Multiplayer) | [0.3.0](https://github.com/HDErick/BO2-Requiem-NX/releases/tag/0.3.0) | 84,911,876 | Tested on Switch |
 | `t6zm.nro` (Zombies) | 0.3.0 (first upload) | 52,273,725 | Supported, not tested in game yet |
 | `t6mp.nro` (Multiplayer) | 0.3.0 (first upload) | 84,908,884 | Supported, not tested in game yet |
 | `t6zm.nro` (Zombies) | [0.2.5](https://github.com/HDErick/BO2-Requiem-NX/releases/tag/0.2.5) | 51,335,533 | Tested on Switch |

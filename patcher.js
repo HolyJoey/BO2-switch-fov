@@ -32,9 +32,9 @@
   // Builds whose offsets have been checked by hand. Auto-detection handles every other build;
   // this list adds the release tag, the "tested" status and the original bytes for restoring.
   const KNOWN = [
-    { kind: 'zm', build: '0.3.0', size: 52277821, tested: false,
+    { kind: 'zm', build: '0.3.0', size: 52277821, tested: true,
       sites: [{ off: 0x219d619, old: [0x80, 0xda, 0x44, 0xb9] }, { off: 0x24886e5, old: [0x00, 0x00, 0x4e, 0xb9] }] },
-    { kind: 'mp', build: '0.3.0', size: 84911876, tested: false,
+    { kind: 'mp', build: '0.3.0', size: 84911876, tested: true,
       sites: [{ off: 0x40b1810, old: [0x80, 0x5a, 0x47, 0xb9] }, { off: 0x4397a9c, old: [0x00, 0x80, 0x40, 0xb9] }] },
     // First upload of 0.3.0; the release zip was replaced a few hours later with a rebuilt engine.
     { kind: 'zm', build: '0.3.0', note: 'first upload', size: 52273725, tested: false,
