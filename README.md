@@ -28,8 +28,6 @@ Works in any modern browser, on desktop and on phones.
    seta cg_fov_default "120"
    ```
 
-   For Zombies, play without the `dlc5` mod, because it resets the FOV to 90 by itself.
-
 To undo it, put your original file back.
 
 ## Supported versions
